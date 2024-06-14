@@ -14,4 +14,25 @@ router.get('/produtos', async (req, res) => {
     }
 });
 
+
+// Rota para atualizar o estoque do produto
+router.put('/produtos/:id', async (req, res) => {
+  const { id } = req.params;
+  const { estoque_atual } = req.body;
+
+  try {
+      const produto = await Produto.findByPk(id);
+      if (!produto) {
+          return res.status(404).json({ message: 'Produto não encontrado' });
+      }
+
+      produto.estoque_atual = estoque_atual;
+      await produto.save();
+      
+      res.json({ message: 'Estoque atualizado com sucesso!', produto });
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;

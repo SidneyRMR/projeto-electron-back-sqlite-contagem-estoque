@@ -7,21 +7,23 @@ const os = require('os');
 
 Modal.setAppElement('#__next');
 
-export default function Home() {
+export default function DesktopApp() {
   const [searchTermName, setSearchTermName] = useState('');
   const [searchTermCode, setSearchTermCode] = useState('');
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [filterType, setFilterType] = useState(''); // 'name' or 'code'
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [editModalIsOpen, setEditModalIsOpen] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
   const [count, setCount] = useState(0);
+  const [message, setMessage] = useState('');
 
   const [localIP, setLocalIp] = useState('');
 
   const fetchLocalIP = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/getLocalIP');
+      const response = await axios.get(`http://localhost:5000/api/getLocalIP`);
       setLocalIp(response.data.ip);
     } catch (error) {
       console.error('Error fetching local IP:', error);
@@ -34,7 +36,7 @@ export default function Home() {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/produtos');
+      const response = await axios.get(`http://localhost:5000/api/produtos`);
       setProducts(response.data);
       setFilteredProducts(response.data);
     } catch (error) {
@@ -78,9 +80,33 @@ export default function Home() {
     }
   };
 
-  const handleCountSubmit = () => {
+  const handleCountSubmit = async () => {
+    if (currentProduct) {
+      try {
+        const response = await axios.put(`http://localhost:5000/api/produtos/${currentProduct.id}`, {
+          estoque_atual: count
+        });
+        if (response.data.message === 'success') {
+          setMessage('Quantidade atualizada com sucesso!');
+          fetchProducts(); // Refresh the product list
+          setEditModalIsOpen(false);
+          setCurrentProduct(null);
+          setCount(0);
+        } else {
+          setMessage('Erro ao atualizar a quantidade. Tente novamente.');
+        }
+      } catch (error) {
+        console.error('Error updating product count:', error);
+        setMessage('Erro ao atualizar a quantidade. Tente novamente.');
+      }
+    }
     setModalIsOpen(false);
-    console.log('Count submitted for product:', currentProduct, 'Count:', count);
+  };
+
+  const handleOpenEditModal = (product) => {
+    setCurrentProduct(product);
+    setCount(product.estoque_atual);
+    setEditModalIsOpen(true);
   };
 
   const handleOpenModal = () => {
@@ -90,6 +116,7 @@ export default function Home() {
 
   return (
     <div style={{ padding: '20px' }}>
+      {message && <p>{message}</p>}
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
         <input
           type="text"
@@ -111,7 +138,7 @@ export default function Home() {
             Ler Código de Barras
           </button>
         ) : (
-          <button onClick={() => setModalIsOpen(true)} style={{ marginLeft: '10px', padding: '10px' }}>
+          <button onClick={handleOpenModal} style={{ marginLeft: '10px', padding: '10px' }}>
             Gerar QR Code
           </button>
         )}
@@ -131,42 +158,92 @@ export default function Home() {
               <tr key={product.id} style={{ borderBottom: '1px solid #eee' }}>
                 <td style={{ padding: '10px' }}>{product.codigo}</td>
                 <td style={{ padding: '10px' }}>{product.nome}</td>
-                <td style={{ padding: '10px' }}>{product.quantidade || 0}</td>
-                <td ><button style={{ padding: '10px' }}>Editar</button></td>
+                <td style={{ padding: '10px' }}>{product.estoque_atual || 0}</td>
+                <td>
+                  <button onClick={() => handleOpenEditModal(product)} style={{ padding: '10px' }}>Editar</button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <Modal 
-  isOpen={modalIsOpen} 
-  onRequestClose={() => setModalIsOpen(false)} 
-  style={{ 
-    content: { 
-      display: 'flex', 
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      textAlign: 'center' 
-    } 
-  }}
->
-  <div>
-    <h2>ACESSO MOBILE</h2>
-    <QRCode value={`http://${localIP}:3000`} /><br />
-    <button 
-      onClick={handleCountSubmit} 
-      style={{ 
-        display: 'flex', 
-        marginTop: '20px', 
-        padding: '15px', 
-        fontSize: '18px' 
-      }}
-    >
-      Fechar
-    </button>
-  </div>
-</Modal>
-
+      <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={() => setModalIsOpen(false)}
+        style={{
+          content: {
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center'
+          }
+        }}
+      >
+        <div>
+          <h2>ACESSO MOBILE</h2>
+          <QRCode value={`http://${localIP}:3000/mobile`} /><br />
+          <button
+            onClick={() => setModalIsOpen(false)}
+            style={{
+              display: 'flex',
+              marginTop: '20px',
+              padding: '15px',
+              fontSize: '18px'
+            }}
+          >
+            Fechar
+          </button>
+        </div>
+      </Modal>
+      <Modal
+        isOpen={editModalIsOpen}
+        onRequestClose={() => setEditModalIsOpen(false)}
+        style={{
+          content: {
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center'
+          }
+        }}
+      >
+        <div>
+          <h2>Editar Quantidade do Produto</h2>
+          {currentProduct && (
+            <>
+              <p>{currentProduct.nome}</p>
+              <input
+                type="number"
+                value={count}
+                onChange={(e) => setCount(Number(e.target.value))}
+                style={{ padding: '10px', fontSize: '16px' }}
+              />
+              <button
+                onClick={handleCountSubmit}
+                style={{
+                  display: 'flex',
+                  marginTop: '20px',
+                  padding: '15px',
+                  fontSize: '18px'
+                }}
+              >
+                Salvar
+              </button>
+              <button
+                onClick={() => setEditModalIsOpen(false)}
+                style={{
+                  display: 'flex',
+                  marginTop: '10px',
+                  padding: '15px',
+                  fontSize: '18px'
+                }}
+              >
+                Cancelar
+              </button>
+            </>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -24,19 +24,14 @@ app.get('/produtos', (req, res) => {
 });
 
 app.post('/produtos', (req, res) => {
-  const { nome, quantidade } = req.body;
-  db.run('INSERT INTO produtos (nome, quantidade) VALUES (?, ?)', [nome, quantidade], function(err) {
+  const { estoque_atual } = req.body;
+  db.run('INSERT INTO produtos (nome, estoque_atual) VALUES (?, ?)', [estoque_atual], function(err) {
     if (err) {
       res.status(400).json({ error: err.message });
       return;
     }
     res.json({
       message: 'success',
-      data: {
-        id: this.lastID,
-        nome,
-        quantidade,
-      },
     });
   });
 });

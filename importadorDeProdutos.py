@@ -22,7 +22,7 @@ def create_table_produtos(conn):
                 codigo INTEGER,
                 nome TEXT NOT NULL,
                 estoque_atual INTEGER DEFAULT 0,
-                EAN INTEGER
+                EAN STRING
             )
         ''')
 
