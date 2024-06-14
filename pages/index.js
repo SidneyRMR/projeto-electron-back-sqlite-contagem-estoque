@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import Modal from 'react-modal';
 import QRCode from 'react-qr-code';
@@ -8,137 +8,138 @@ const os = require('os');
 Modal.setAppElement('#__next');
 
 export default function DesktopApp() {
-  const [searchTermName, setSearchTermName] = useState('');
-  const [searchTermCode, setSearchTermCode] = useState('');
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [filterType, setFilterType] = useState(''); // 'name' or 'code'
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [editModalIsOpen, setEditModalIsOpen] = useState(false);
-  const [currentProduct, setCurrentProduct] = useState(null);
-  const [count, setCount] = useState(0);
-  const [message, setMessage] = useState('');
+  const [termoBuscaNome, setTermoBuscaNome] = useState('');
+  const [termoBuscaCodigo, setTermoBuscaCodigo] = useState('');
+  const [produtos, setProdutos] = useState([]);
+  const [produtosFiltrados, setProdutosFiltrados] = useState([]);
+  const [tipoFiltro, setTipoFiltro] = useState('');
+  const [modalAberto, setModalAberto] = useState(false);
+  const [modalEdicaoAberto, setModalEdicaoAberto] = useState(false);
+  const [produtoAtual, setProdutoAtual] = useState(null);
+  const [quantidade, setQuantidade] = useState(0);
+  const [enderecoLocalIP, setEnderecoLocalIP] = useState('');
+  const refInputQuantidade = useRef(null);
 
-  const [localIP, setLocalIp] = useState('');
-
-  const fetchLocalIP = async () => {
+  const buscarEnderecoLocalIP = async () => {
     try {
       const response = await axios.get(`http://localhost:5000/api/getLocalIP`);
-      setLocalIp(response.data.ip);
+      setEnderecoLocalIP(response.data.ip);
     } catch (error) {
-      console.error('Error fetching local IP:', error);
+      console.error('Erro ao buscar o endereço IP local:', error);
     }
   };
 
   useEffect(() => {
-    fetchProducts();
+    buscarProdutos();
   }, []);
 
-  const fetchProducts = async () => {
+  const buscarProdutos = async () => {
     try {
       const response = await axios.get(`http://localhost:5000/api/produtos`);
-      setProducts(response.data);
-      setFilteredProducts(response.data);
+      setProdutos(response.data);
+      setProdutosFiltrados(response.data);
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error('Erro ao buscar os produtos:', error);
     }
   };
 
-  const handleNameSearchChange = (event) => {
-    setSearchTermName(event.target.value);
-    setFilterType('name');
-    filterProducts(event.target.value, searchTermCode, 'name');
+  const handleMudancaBuscaNome = (event) => {
+    setTermoBuscaNome(event.target.value);
+    setTipoFiltro('name');
+    filtrarProdutos(event.target.value, termoBuscaCodigo, 'name');
   };
 
-  const handleCodeSearchChange = (event) => {
-    setSearchTermCode(event.target.value);
-    setFilterType('code');
-    filterProducts(searchTermName, event.target.value, 'code');
+  const handleMudancaBuscaCodigo = (event) => {
+    setTermoBuscaCodigo(event.target.value);
+    setTipoFiltro('code');
+    filtrarProdutos(termoBuscaNome, event.target.value, 'code');
   };
 
-  const filterProducts = (name, code, type) => {
-    let filtered = [];
-    if (type === 'name') {
-      filtered = products.filter(product =>
-        product.nome.toLowerCase().includes(name.toLowerCase())
+  const filtrarProdutos = (nome, codigo, tipo) => {
+    let filtrados = [];
+    if (tipo === 'name') {
+      filtrados = produtos.filter(produto =>
+        produto.nome.toLowerCase().includes(nome.toLowerCase())
       );
-    } else if (type === 'code') {
-      filtered = products.filter(product =>
-        String(product.codigo).includes(code)
+    } else if (tipo === 'code') {
+      filtrados = produtos.filter(produto =>
+        String(produto.codigo).includes(codigo)
       );
     }
-    setFilteredProducts(filtered);
+    setProdutosFiltrados(filtrados);
   };
 
-  const handleBarcodeScan = () => {
-    // Implement barcode scanning functionality here
-    // For now, let's simulate a product scan
-    const product = products.find(p => p.id === 1); // Simulate scanning product with id 1
-    if (product) {
-      setCurrentProduct(product);
-      setModalIsOpen(true);
+  const handleLeituraCodigoBarras = () => {
+    const produto = produtos.find(p => p.id === 1);
+    if (produto) {
+      setProdutoAtual(produto);
+      setModalAberto(true);
     }
   };
 
-  const handleCountSubmit = async () => {
-    if (currentProduct) {
+  const handleEnvioQuantidade = async () => {
+    if (produtoAtual) {
       try {
-        const response = await axios.put(`http://localhost:5000/api/produtos/${currentProduct.id}`, {
-          estoque_atual: count
+        await axios.put(`http://localhost:5000/api/produtos/${produtoAtual.id}`, {
+          estoque_atual: quantidade
         });
-        if (response.data.message === 'success') {
-          setMessage('Quantidade atualizada com sucesso!');
-          fetchProducts(); // Refresh the product list
-          setEditModalIsOpen(false);
-          setCurrentProduct(null);
-          setCount(0);
-        } else {
-          setMessage('Erro ao atualizar a quantidade. Tente novamente.');
-        }
+        buscarProdutos();
+        setModalEdicaoAberto(false);
+        setProdutoAtual(null);
+        setQuantidade(0);
       } catch (error) {
-        console.error('Error updating product count:', error);
-        setMessage('Erro ao atualizar a quantidade. Tente novamente.');
+        console.error('Erro ao atualizar a quantidade do produto:', error);
       }
     }
-    setModalIsOpen(false);
   };
 
-  const handleOpenEditModal = (product) => {
-    setCurrentProduct(product);
-    setCount(product.estoque_atual);
-    setEditModalIsOpen(true);
+  const handleAbrirModalEdicao = (produto) => {
+    setProdutoAtual(produto);
+    setQuantidade(produto.estoque_atual);
+    setModalEdicaoAberto(true);
   };
 
-  const handleOpenModal = () => {
-    fetchLocalIP();
-    setModalIsOpen(true);
+  const handleAbrirModal = () => {
+    buscarEnderecoLocalIP();
+    setModalAberto(true);
+  };
+
+  const afterOpenModalEdicao = () => {
+    if (refInputQuantidade.current) {
+      refInputQuantidade.current.focus();
+    }
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      handleEnvioQuantidade();
+    }
   };
 
   return (
     <div style={{ padding: '20px' }}>
-      {message && <p>{message}</p>}
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
         <input
           type="text"
           placeholder="ID"
-          value={searchTermCode}
-          onChange={handleCodeSearchChange}
+          value={termoBuscaCodigo}
+          onChange={handleMudancaBuscaCodigo}
           maxLength="3"
           style={{ width: '50px', marginRight: '10px', padding: '10px', fontSize: '16px' }}
         />
         <input
           type="text"
           placeholder="Buscar produtos por nome..."
-          value={searchTermName}
-          onChange={handleNameSearchChange}
+          value={termoBuscaNome}
+          onChange={handleMudancaBuscaNome}
           style={{ flex: 1, padding: '10px', fontSize: '16px' }}
         />
         {isMobile ? (
-          <button onClick={handleBarcodeScan} style={{ marginLeft: '10px', padding: '10px' }}>
+          <button onClick={handleLeituraCodigoBarras} style={{ marginLeft: '10px', padding: '10px' }}>
             Ler Código de Barras
           </button>
         ) : (
-          <button onClick={handleOpenModal} style={{ marginLeft: '10px', padding: '10px' }}>
+          <button onClick={handleAbrirModal} style={{ marginLeft: '10px', padding: '10px' }}>
             Gerar QR Code
           </button>
         )}
@@ -154,13 +155,13 @@ export default function DesktopApp() {
             </tr>
           </thead>
           <tbody>
-            {filteredProducts.map(product => (
-              <tr key={product.id} style={{ borderBottom: '1px solid #eee' }}>
-                <td style={{ padding: '10px' }}>{product.codigo}</td>
-                <td style={{ padding: '10px' }}>{product.nome}</td>
-                <td style={{ padding: '10px' }}>{product.estoque_atual || 0}</td>
+            {produtosFiltrados.map(produto => (
+              <tr key={produto.id} style={{ borderBottom: '1px solid #eee' }}>
+                <td style={{ padding: '10px' }}>{produto.codigo}</td>
+                <td style={{ padding: '10px' }}>{produto.nome}</td>
+                <td style={{ padding: '10px' }}>{produto.estoque_atual || 0}</td>
                 <td>
-                  <button onClick={() => handleOpenEditModal(product)} style={{ padding: '10px' }}>Editar</button>
+                  <button onClick={() => handleAbrirModalEdicao(produto)} style={{ padding: '10px' }}>Editar</button>
                 </td>
               </tr>
             ))}
@@ -168,8 +169,8 @@ export default function DesktopApp() {
         </table>
       </div>
       <Modal
-        isOpen={modalIsOpen}
-        onRequestClose={() => setModalIsOpen(false)}
+        isOpen={modalAberto}
+        onRequestClose={() => setModalAberto(false)}
         style={{
           content: {
             display: 'flex',
@@ -181,9 +182,9 @@ export default function DesktopApp() {
       >
         <div>
           <h2>ACESSO MOBILE</h2>
-          <QRCode value={`http://${localIP}:3000/mobile`} /><br />
+          <QRCode value={`http://${enderecoLocalIP}:3000/mobile`} /><br />
           <button
-            onClick={() => setModalIsOpen(false)}
+            onClick={() => setModalAberto(false)}
             style={{
               display: 'flex',
               marginTop: '20px',
@@ -196,8 +197,9 @@ export default function DesktopApp() {
         </div>
       </Modal>
       <Modal
-        isOpen={editModalIsOpen}
-        onRequestClose={() => setEditModalIsOpen(false)}
+        isOpen={modalEdicaoAberto}
+        onAfterOpen={afterOpenModalEdicao}
+        onRequestClose={() => setModalEdicaoAberto(false)}
         style={{
           content: {
             display: 'flex',
@@ -209,17 +211,19 @@ export default function DesktopApp() {
       >
         <div>
           <h2>Editar Quantidade do Produto</h2>
-          {currentProduct && (
+          {produtoAtual && (
             <>
-              <p>{currentProduct.nome}</p>
+              <p>{produtoAtual.nome}</p>
               <input
+                ref={refInputQuantidade}
                 type="number"
-                value={count}
-                onChange={(e) => setCount(Number(e.target.value))}
+                value={quantidade}
+                onChange={(e) => setQuantidade(e.target.value)}
+                onKeyDown={handleKeyDown}
                 style={{ padding: '10px', fontSize: '16px' }}
               />
               <button
-                onClick={handleCountSubmit}
+                onClick={handleEnvioQuantidade}
                 style={{
                   display: 'flex',
                   marginTop: '20px',
@@ -230,7 +234,7 @@ export default function DesktopApp() {
                 Salvar
               </button>
               <button
-                onClick={() => setEditModalIsOpen(false)}
+                onClick={() => setModalEdicaoAberto(false)}
                 style={{
                   display: 'flex',
                   marginTop: '10px',
