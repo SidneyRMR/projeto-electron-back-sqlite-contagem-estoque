@@ -1,16 +1,18 @@
 // components/Header.js
-const isMobile = require('react-device-detect').isMobile;
+
 import React from 'react';
 import { AppBar, Toolbar, Typography, Button } from '@mui/material';
 
 const Header = ({ gerarRelatorioPDF }) => (
-  <AppBar position="static" sx={{ marginBottom: 4 }}>
+  <AppBar position="static" sx={{ marginBottom: 1, marginTop: 2, padding: 2 }}>
     <Toolbar>
-      <img src="/logo.jpg" alt="Logo" style={{ width: 40, marginRight: 16 }} />
-      <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+      <img src="/logo.jpg" alt="Logo" style={{ width: 80, marginRight: 4 }} />
+      <Typography variant="h5" component="div" sx={{ flexGrow: 1 , marginLeft: 4}}>
         Controle de Estoque
       </Typography>
-      {isMobile ? "" : <Button color="inherit" onClick={gerarRelatorioPDF}>Gerar Relatório PDF</Button>}
+      <Button color="inherit" onClick={gerarRelatorioPDF} className="hide-on-mobile">
+        Gerar Relatório PDF
+      </Button>
     </Toolbar>
   </AppBar>
 );

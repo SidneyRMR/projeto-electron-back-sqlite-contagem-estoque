@@ -23,8 +23,8 @@ export default function DesktopApp() {
   const refInputQuantidade = useRef(null);
 
   useEffect(() => {
-    buscarProdutos();
     buscarEnderecoLocalIP();
+    buscarProdutos();
   }, []);
 
   const buscarEnderecoLocalIP = async () => {
@@ -70,14 +70,6 @@ export default function DesktopApp() {
     setProdutosFiltrados(filtrados);
   };
 
-  const handleLeituraCodigoBarras = () => {
-    const produto = produtos.find(p => p.id === 1);
-    if (produto) {
-      setProdutoAtual(produto);
-      setModalAberto(true);
-    }
-  };
-
   const handleEnvioQuantidade = async () => {
     if (produtoAtual) {
       try {
@@ -109,7 +101,7 @@ export default function DesktopApp() {
           termoBuscaCodigo={termoBuscaCodigo}
           handleMudancaBuscaNome={handleMudancaBuscaNome}
           handleMudancaBuscaCodigo={handleMudancaBuscaCodigo}
-          handleLeituraCodigoBarras={handleLeituraCodigoBarras}
+          //handleLeituraCodigoBarras={handleLeituraCodigoBarras}
           handleAbrirModal={() => setModalAberto(true)}
           isMobile={isMobile}
         />

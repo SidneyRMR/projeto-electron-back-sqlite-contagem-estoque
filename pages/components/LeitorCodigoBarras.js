@@ -2,12 +2,16 @@ import React, { useRef, useState } from 'react';
 import Quagga from 'quagga';
 import ModalEditarProduto from './ModalEditarProduto'; // Importe o componente ModalEditarProduto aqui
 
-const BarcodeScanner = ({ produtos, setModalEdicaoAberto, setProdutoAtual }) => {
+const LeitorCodigoBarras = ({ produtos, setModalEdicaoAberto, setProdutoAtual }) => {
   const videoRef = useRef(null);
   const [barcode, setBarcode] = useState('');
   const [modalEdicaoAberto, setModalEdicaoAbertoLocal] = useState(false);
+  const [quantidade, setQuantidade] = useState(0); // Adicione conforme necessário
 
-  // Inicializa o scanner de código de barras
+  // Ref para input de quantidade (caso seja necessário)
+  const refInputQuantidade = useRef(null);
+
+  // Função para iniciar o scanner de código de barras
   const startScanner = () => {
     Quagga.init({
       inputStream: {
@@ -48,6 +52,23 @@ const BarcodeScanner = ({ produtos, setModalEdicaoAberto, setProdutoAtual }) => 
     setBarcode(code);
   };
 
+  // Função para lidar com o envio da quantidade do produto
+  const handleEnvioQuantidade = async () => {
+    if (produtoAtual) {
+      try {
+        await axios.put(`http://localhost:5000/api/produtos/${produtoAtual.id}`, {
+          estoque_atual: quantidade
+        });
+        buscarProdutos();
+        setModalEdicaoAberto(false);
+        setProdutoAtual(null);
+        setQuantidade(0);
+      } catch (error) {
+        console.error('Erro ao atualizar a quantidade do produto:', error);
+      }
+    }
+  };
+
   return (
     <div>
       <video ref={videoRef} />
@@ -56,18 +77,18 @@ const BarcodeScanner = ({ produtos, setModalEdicaoAberto, setProdutoAtual }) => 
 
       {/* Modal para editar quantidade do produto */}
       <ModalEditarProduto
-          modalEdicaoAberto={modalEdicaoAberto}
-          afterOpenModalEdicao={() => refInputQuantidade.current && refInputQuantidade.current.focus()}
-          setModalEdicaoAberto={setModalEdicaoAberto}
-          produtoAtual={produtoAtual}
-          quantidade={quantidade}
-          setQuantidade={setQuantidade}
-          handleEnvioQuantidade={handleEnvioQuantidade}
-          handleKeyDown={(e) => e.key === 'Enter' && handleEnvioQuantidade()}
-          refInputQuantidade={refInputQuantidade}
-        />
+        modalEdicaoAberto={modalEdicaoAberto}
+        afterOpenModalEdicao={() => refInputQuantidade.current && refInputQuantidade.current.focus()}
+        setModalEdicaoAberto={setModalEdicaoAbertoLocal} // Use setModalEdicaoAbertoLocal para controlar o estado local
+        produtoAtual={produtoAtual}
+        quantidade={quantidade}
+        setQuantidade={setQuantidade}
+        handleEnvioQuantidade={handleEnvioQuantidade}
+        handleKeyDown={(e) => e.key === 'Enter' && handleEnvioQuantidade()}
+        refInputQuantidade={refInputQuantidade}
+      />
     </div>
   );
 };
 
-export default BarcodeScanner;
+export default LeitorCodigoBarras;

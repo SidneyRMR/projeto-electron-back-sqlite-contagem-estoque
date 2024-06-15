@@ -12,3 +12,17 @@ input {
   width: 100%;
   box-sizing: border-box;
 }
+
+/* Global Styles or a CSS Module */
+@media (max-width: 600px) {
+  .hide-on-mobile {
+    display: none;
+  }
+}
+/* Global Styles or a CSS Module */
+@media (max-width: 600px) {
+  .table-container {
+    max-height: calc(100vh - 150px); /* Ajuste conforme necessário */
+    overflow: auto;
+  }
+}

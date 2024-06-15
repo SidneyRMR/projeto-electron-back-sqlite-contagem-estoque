@@ -1,19 +1,19 @@
-// Arquivo: pages/mobileApp.js
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Container, Box } from '@mui/material';
 import BarraDeBusca from './components/BarraDeBusca';
-import TabelaDeProdutos from './components/TabelaDeProdutos';
+import TabelaDeProdutosMobile from './components/TabelaDeProdutosMobile';
 import ModalEditarProduto from './components/ModalEditarProduto';
 import Header from './components/Header';
 import { gerarRelatorioPDF } from './utils/pdfUtils';
 import LeitorCodigoBarras from './components/LeitorCodigoBarras'; // Importe o componente
 
-export default function mobileApp() {
+export default function MobileApp() {
   const [termoBuscaNome, setTermoBuscaNome] = useState('');
   const [termoBuscaCodigo, setTermoBuscaCodigo] = useState('');
   const [produtos, setProdutos] = useState([]);
   const [produtosFiltrados, setProdutosFiltrados] = useState([]);
+  const [modalAberto, setModalAberto] = useState(false);
   const [modalEdicaoAberto, setModalEdicaoAberto] = useState(false);
   const [produtoAtual, setProdutoAtual] = useState(null);
   const [quantidade, setQuantidade] = useState(0);
@@ -21,30 +21,70 @@ export default function mobileApp() {
   const refInputQuantidade = useRef(null);
 
   useEffect(() => {
-    // Configuração inicial ao carregar a página
-    buscarEnderecoLocalIP();
-    buscarProdutos();
+    const carregarDadosIniciais = async () => {
+      try {
+        const enderecoIP = await buscarEnderecoLocalIP();
+        setEnderecoLocalIP(enderecoIP);
+
+        const produtosResponse = await buscarProdutos(enderecoIP);
+        setProdutos(produtosResponse);
+        setProdutosFiltrados(produtosResponse);
+      } catch (error) {
+        console.error('Erro ao carregar dados iniciais:', error);
+      }
+    };
+
+    carregarDadosIniciais();
   }, []);
 
   const buscarEnderecoLocalIP = async () => {
     try {
-      // Aqui, o endereço é recebido diretamente do link gerado pelo QRCode
       const urlParams = new URLSearchParams(window.location.search);
       const enderecoIP = urlParams.get('enderecoLocalIP');
-      setEnderecoLocalIP(enderecoIP);
+      return enderecoIP;
     } catch (error) {
       console.error('Erro ao buscar o endereço IP local:', error);
+      throw error;
     }
   };
 
-  const buscarProdutos = async () => {
+  const buscarProdutos = async (enderecoIP) => {
     try {
-      // Exemplo de requisição para buscar produtos
-      const response = await axios.get(`http://${enderecoLocalIP}:5000/api/produtos`);
-      setProdutos(response.data);
-      setProdutosFiltrados(response.data);
+      const response = await axios.get(`http://${enderecoIP}:5000/api/produtos`);
+      return response.data;
     } catch (error) {
       console.error('Erro ao buscar os produtos:', error);
+      throw error;
+    }
+  };
+
+  const handleEnvioQuantidade = async () => {
+    try {
+      if (produtoAtual) {
+        const response = await axios.put(`http://${enderecoLocalIP}:5000/api/produtos/${produtoAtual.id}`, {
+          estoque_atual: quantidade
+        });
+
+        if (response.status === 200) {
+          // Atualiza a quantidade no produto atual
+          const produtosAtualizados = produtos.map(produto =>
+            produto.id === produtoAtual.id ? { ...produto, estoque_atual: quantidade } : produto
+          );
+
+          // Atualiza as listas de produtos
+          setProdutos(produtosAtualizados);
+          setProdutosFiltrados(produtosAtualizados);
+
+          // Fecha o modal e limpa o estado
+          setModalEdicaoAberto(false);
+          setProdutoAtual(null);
+          setQuantidade(0);
+        } else {
+          console.error('Erro ao atualizar a quantidade do produto:', response.data);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar a quantidade do produto:', error);
     }
   };
 
@@ -73,29 +113,12 @@ export default function mobileApp() {
   };
 
   const handleLeituraCodigoBarras = (data) => {
-    // Lógica para encontrar o produto pelo código de barras
     const produtoEncontrado = produtos.find(produto => produto.EAN === data);
     if (produtoEncontrado) {
       setProdutoAtual(produtoEncontrado);
       setModalEdicaoAberto(true);
     } else {
       alert('Produto não encontrado.');
-    }
-  };
-
-  const handleEnvioQuantidade = async () => {
-    if (produtoAtual) {
-      try {
-        await axios.put(`http://${enderecoLocalIP}:5000/api/produtos/${produtoAtual.id}`, {
-          estoque_atual: quantidade
-        });
-        buscarProdutos(); // Atualiza a lista de produtos após a alteração
-        setModalEdicaoAberto(false);
-        setProdutoAtual(null);
-        setQuantidade(0);
-      } catch (error) {
-        console.error('Erro ao atualizar a quantidade do produto:', error);
-      }
     }
   };
 
@@ -115,9 +138,9 @@ export default function mobileApp() {
           handleMudancaBuscaNome={handleMudancaBuscaNome}
           handleMudancaBuscaCodigo={handleMudancaBuscaCodigo}
           handleLeituraCodigoBarras={handleLeituraCodigoBarras}
-          isMobile={true} // Informa que está no modo mobile
+          handleAbrirModal={() => setModalAberto(true)}
         />
-        <TabelaDeProdutos
+        <TabelaDeProdutosMobile
           produtosFiltrados={produtosFiltrados}
           handleAbrirModalEdicao={handleAbrirModalEdicao}
         />
