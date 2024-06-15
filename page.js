@@ -1,8 +1,5 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
-const isMobile = require('react-device-detect').isMobile;
-const DesktopApp = require('./Home');
-const MobileApp = require('./MobileApp');
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -13,8 +10,6 @@ function createWindow() {
       nodeIntegration: true,
     },
   });
-
-  //const App = isMobile ? <MobileApp /> : <DesktopApp />;
 
   mainWindow.loadURL(App);
 }

@@ -1,21 +1,19 @@
+// Arquivo: pages/mobileApp.js
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { isMobile } from 'react-device-detect';
 import { Container, Box } from '@mui/material';
 import BarraDeBusca from './components/BarraDeBusca';
 import TabelaDeProdutos from './components/TabelaDeProdutos';
 import ModalEditarProduto from './components/ModalEditarProduto';
-import ModalQRCode from './components/ModalQRCode';
 import Header from './components/Header';
 import { gerarRelatorioPDF } from './utils/pdfUtils';
 import LeitorCodigoBarras from './components/LeitorCodigoBarras'; // Importe o componente
 
-export default function DesktopApp() {
+export default function mobileApp() {
   const [termoBuscaNome, setTermoBuscaNome] = useState('');
   const [termoBuscaCodigo, setTermoBuscaCodigo] = useState('');
   const [produtos, setProdutos] = useState([]);
   const [produtosFiltrados, setProdutosFiltrados] = useState([]);
-  const [modalAberto, setModalAberto] = useState(false);
   const [modalEdicaoAberto, setModalEdicaoAberto] = useState(false);
   const [produtoAtual, setProdutoAtual] = useState(null);
   const [quantidade, setQuantidade] = useState(0);
@@ -23,14 +21,17 @@ export default function DesktopApp() {
   const refInputQuantidade = useRef(null);
 
   useEffect(() => {
-    buscarProdutos();
+    // Configuração inicial ao carregar a página
     buscarEnderecoLocalIP();
+    buscarProdutos();
   }, []);
 
   const buscarEnderecoLocalIP = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/getLocalIP`);
-      setEnderecoLocalIP(response.data.ip);
+      // Aqui, o endereço é recebido diretamente do link gerado pelo QRCode
+      const urlParams = new URLSearchParams(window.location.search);
+      const enderecoIP = urlParams.get('enderecoLocalIP');
+      setEnderecoLocalIP(enderecoIP);
     } catch (error) {
       console.error('Erro ao buscar o endereço IP local:', error);
     }
@@ -38,7 +39,8 @@ export default function DesktopApp() {
 
   const buscarProdutos = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/produtos`);
+      // Exemplo de requisição para buscar produtos
+      const response = await axios.get(`http://${enderecoLocalIP}:5000/api/produtos`);
       setProdutos(response.data);
       setProdutosFiltrados(response.data);
     } catch (error) {
@@ -70,21 +72,24 @@ export default function DesktopApp() {
     setProdutosFiltrados(filtrados);
   };
 
-  const handleLeituraCodigoBarras = () => {
-    const produto = produtos.find(p => p.id === 1);
-    if (produto) {
-      setProdutoAtual(produto);
-      setModalAberto(true);
+  const handleLeituraCodigoBarras = (data) => {
+    // Lógica para encontrar o produto pelo código de barras
+    const produtoEncontrado = produtos.find(produto => produto.EAN === data);
+    if (produtoEncontrado) {
+      setProdutoAtual(produtoEncontrado);
+      setModalEdicaoAberto(true);
+    } else {
+      alert('Produto não encontrado.');
     }
   };
 
   const handleEnvioQuantidade = async () => {
     if (produtoAtual) {
       try {
-        await axios.put(`http://localhost:5000/api/produtos/${produtoAtual.id}`, {
+        await axios.put(`http://${enderecoLocalIP}:5000/api/produtos/${produtoAtual.id}`, {
           estoque_atual: quantidade
         });
-        buscarProdutos();
+        buscarProdutos(); // Atualiza a lista de produtos após a alteração
         setModalEdicaoAberto(false);
         setProdutoAtual(null);
         setQuantidade(0);
@@ -110,8 +115,7 @@ export default function DesktopApp() {
           handleMudancaBuscaNome={handleMudancaBuscaNome}
           handleMudancaBuscaCodigo={handleMudancaBuscaCodigo}
           handleLeituraCodigoBarras={handleLeituraCodigoBarras}
-          handleAbrirModal={() => setModalAberto(true)}
-          isMobile={isMobile}
+          isMobile={true} // Informa que está no modo mobile
         />
         <TabelaDeProdutos
           produtosFiltrados={produtosFiltrados}
@@ -127,11 +131,6 @@ export default function DesktopApp() {
           handleEnvioQuantidade={handleEnvioQuantidade}
           handleKeyDown={(e) => e.key === 'Enter' && handleEnvioQuantidade()}
           refInputQuantidade={refInputQuantidade}
-        />
-        <ModalQRCode
-          modalAberto={modalAberto}
-          setModalAberto={setModalAberto}
-          enderecoLocalIP={enderecoLocalIP}
         />
       </Box>
     </Container>
