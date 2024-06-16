@@ -1,33 +1,70 @@
-import React from 'react';
-import { Modal, Box, Typography, TextField, Button, Toolbar, useMediaQuery, useTheme } from '@mui/material';
+import React, { useCallback, useMemo } from 'react';
+import {
+  Modal,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Toolbar,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 
-export default function ModalEditarProduto({ modalEdicaoAberto, afterOpenModalEdicao, setModalEdicaoAberto, produtoAtual, quantidade, setQuantidade, handleEnvioQuantidade, handleKeyDown }) {
+const ModalEditarProduto = ({
+  modalEdicaoAberto,
+  afterOpenModalEdicao,
+  setModalEdicaoAberto,
+  produtoAtual,
+  quantidade,
+  setQuantidade,
+  handleEnvioQuantidade,
+  handleKeyDown,
+}) => {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const handleClose = useCallback(() => setModalEdicaoAberto(false), [setModalEdicaoAberto]);
+  const handleChange = useCallback((e) => setQuantidade(e.target.value), [setQuantidade]);
+
+  const modalStyle = useMemo(
+    () => ({
+      position: 'absolute',
+      top: '40%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      width: '90%', // Largura responsiva
+      maxWidth: 400, // Largura máxima para telas maiores
+      bgcolor: 'background.paper',
+      border: '2px solid #000',
+      boxShadow: 24,
+      p: 2,
+    }),
+    []
+  );
 
   return (
     <Modal
       open={modalEdicaoAberto}
-      onClose={() => setModalEdicaoAberto(false)}
+      onClose={handleClose}
       onAfterOpen={afterOpenModalEdicao}
       fullScreen={fullScreen}
     >
       <Box sx={modalStyle}>
-        <Toolbar sx={{ bgcolor: 'primary.main', justifyContent: 'center' }}>
-          <Typography variant="h6" component="div" sx={{ color: 'primary.contrastText', padding: 2 }}>
-            Editar Quantidade do Produto
+        <Toolbar sx={{ bgcolor: 'primary.main', justifyContent: 'center', m: 0, p: 0 }}>
+          <Typography variant="h7" component="div" sx={{ color: 'primary.contrastText', padding: 0 }}>
+            EDITAR QUANTIDADE DO PRODUTO
           </Typography>
         </Toolbar>
         {produtoAtual && (
           <>
-            <Typography sx={{ paddingTop: 2, alignItems: 'center'}}>{produtoAtual.nome}</Typography>
+            <Typography sx={{ paddingTop: 2, alignItems: 'center' }}>{produtoAtual.nome}</Typography>
             <TextField
               autoFocus
               type="number"
               value={quantidade}
-              onChange={(e) => setQuantidade(e.target.value)}
+              onChange={handleChange}
               onKeyDown={handleKeyDown}
               fullWidth
               margin="normal"
@@ -43,7 +80,7 @@ export default function ModalEditarProduto({ modalEdicaoAberto, afterOpenModalEd
               </Button>
               <Button
                 variant="outlined"
-                onClick={() => setModalEdicaoAberto(false)}
+                onClick={handleClose}
                 startIcon={<CancelIcon />} // Ícone do Material-UI para Cancelar
                 sx={{ width: '120px', height: '48px', margin: '8px' }} // Ajustando tamanho e margem
               >
@@ -55,17 +92,6 @@ export default function ModalEditarProduto({ modalEdicaoAberto, afterOpenModalEd
       </Box>
     </Modal>
   );
-}
-
-const modalStyle = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: '90%', // Largura responsiva
-  maxWidth: 400, // Largura máxima para telas maiores
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
-  boxShadow: 24,
-  p: 4,
 };
+
+export default React.memo(ModalEditarProduto);

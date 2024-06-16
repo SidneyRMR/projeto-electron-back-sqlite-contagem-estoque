@@ -1,14 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import { isMobile } from 'react-device-detect';
-import { Container, Box } from '@mui/material';
+import { Box } from '@mui/material';
 import BarraDeBusca from './components/BarraDeBusca';
 import TabelaDeProdutos from './components/TabelaDeProdutos';
 import ModalEditarProduto from './components/ModalEditarProduto';
 import ModalQRCode from './components/ModalQRCode';
 import Header from './components/Header';
 import { gerarRelatorioPDF } from './utils/pdfUtils';
-import LeitorCodigoBarras from './components/LeitorCodigoBarras'; // Importe o componente
 
 export default function DesktopApp() {
   const [termoBuscaNome, setTermoBuscaNome] = useState('');
@@ -20,23 +19,22 @@ export default function DesktopApp() {
   const [produtoAtual, setProdutoAtual] = useState(null);
   const [quantidade, setQuantidade] = useState(0);
   const [enderecoLocalIP, setEnderecoLocalIP] = useState('');
-  const refInputQuantidade = useRef(null);
 
   useEffect(() => {
     buscarEnderecoLocalIP();
     buscarProdutos();
   }, []);
 
-  const buscarEnderecoLocalIP = async () => {
+  const buscarEnderecoLocalIP = useCallback(async () => {
     try {
       const response = await axios.get(`http://localhost:5000/api/getLocalIP`);
       setEnderecoLocalIP(response.data.ip);
     } catch (error) {
       console.error('Erro ao buscar o endereço IP local:', error);
     }
-  };
+  }, []);
 
-  const buscarProdutos = async () => {
+  const buscarProdutos = useCallback(async () => {
     try {
       const response = await axios.get(`http://localhost:5000/api/produtos`);
       setProdutos(response.data);
@@ -44,19 +42,19 @@ export default function DesktopApp() {
     } catch (error) {
       console.error('Erro ao buscar os produtos:', error);
     }
-  };
+  }, []);
 
-  const handleMudancaBuscaNome = (event) => {
+  const handleMudancaBuscaNome = useCallback((event) => {
     setTermoBuscaNome(event.target.value);
     filtrarProdutos(event.target.value, termoBuscaCodigo, 'name');
-  };
+  }, [termoBuscaCodigo]);
 
-  const handleMudancaBuscaCodigo = (event) => {
+  const handleMudancaBuscaCodigo = useCallback((event) => {
     setTermoBuscaCodigo(event.target.value);
     filtrarProdutos(termoBuscaNome, event.target.value, 'code');
-  };
+  }, [termoBuscaNome]);
 
-  const filtrarProdutos = (nome, codigo, tipo) => {
+  const filtrarProdutos = useCallback((nome, codigo, tipo) => {
     let filtrados = [];
     if (tipo === 'name') {
       filtrados = produtos.filter(produto =>
@@ -68,9 +66,9 @@ export default function DesktopApp() {
       );
     }
     setProdutosFiltrados(filtrados);
-  };
+  }, [produtos]);
 
-  const handleEnvioQuantidade = async () => {
+  const handleEnvioQuantidade = useCallback(async () => {
     if (produtoAtual) {
       try {
         await axios.put(`http://localhost:5000/api/produtos/${produtoAtual.id}`, {
@@ -84,18 +82,36 @@ export default function DesktopApp() {
         console.error('Erro ao atualizar a quantidade do produto:', error);
       }
     }
-  };
+  }, [produtoAtual, quantidade, buscarProdutos]);
 
-  const handleAbrirModalEdicao = (produto) => {
+  const handleAbrirModalEdicao = useCallback((produto) => {
     setProdutoAtual(produto);
     setQuantidade(produto.estoque_atual);
     setModalEdicaoAberto(true);
-  };
+  }, []);
+
+  const modalStyle = useMemo(() => ({
+    position: 'absolute',
+    top: '40%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: '90%', // Largura responsiva
+    maxWidth: 400, // Largura máxima para telas maiores
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 2,
+  }), []);
 
   return (
-    <Container>
-      <Header gerarRelatorioPDF={() => gerarRelatorioPDF(produtosFiltrados)} />
-      <Box sx={{ p: 2 }}>
+    <Box sx={{
+      p: 0,
+      m: 0,
+      border: '2px solid #ccc', // Adiciona uma borda de 1px sólida cinza
+      borderRadius: '0px', // Borda arredondada
+    }}>
+      <Header gerarRelatorioPDF={() => gerarRelatorioPDF(produtos)} />
+      <Box sx={{ p: 0, marginBottom:0, marginTop:1 }}>
         <BarraDeBusca
           termoBuscaNome={termoBuscaNome}
           termoBuscaCodigo={termoBuscaCodigo}
@@ -111,14 +127,13 @@ export default function DesktopApp() {
         />
         <ModalEditarProduto
           modalEdicaoAberto={modalEdicaoAberto}
-          afterOpenModalEdicao={() => refInputQuantidade.current && refInputQuantidade.current.focus()}
+          afterOpenModalEdicao={() => document.getElementById('quantidade-input')?.focus()}
           setModalEdicaoAberto={setModalEdicaoAberto}
           produtoAtual={produtoAtual}
           quantidade={quantidade}
           setQuantidade={setQuantidade}
           handleEnvioQuantidade={handleEnvioQuantidade}
           handleKeyDown={(e) => e.key === 'Enter' && handleEnvioQuantidade()}
-          refInputQuantidade={refInputQuantidade}
         />
         <ModalQRCode
           modalAberto={modalAberto}
@@ -126,6 +141,6 @@ export default function DesktopApp() {
           enderecoLocalIP={enderecoLocalIP}
         />
       </Box>
-    </Container>
+    </Box>
   );
 }

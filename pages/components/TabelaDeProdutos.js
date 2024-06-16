@@ -1,19 +1,25 @@
-import React from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Paper, Box } from '@mui/material';
+import React, { useCallback } from 'react';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Paper, Box, useMediaQuery, useTheme } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 
-export default function TabelaDeProdutosMobile({ produtosFiltrados, handleAbrirModalEdicao }) {
+const TabelaDeProdutos = ({ produtosFiltrados, handleAbrirModalEdicao }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const handleEditClick = useCallback((produto) => {
+    handleAbrirModalEdicao(produto);
+  }, [handleAbrirModalEdicao]);
 
   return (
-    <Box sx={{ overflowX: 'auto' }}>
-      <TableContainer component={Paper} sx={{ maxHeight: 'calc(100vh - 150px)', overflow: 'auto' }}>
-        <Table stickyHeader sx={{ width: '100%', tableLayout: 'fixed' }}>
+    <Box sx={{ overflowX: 'auto', m:0 }}>
+      <TableContainer component={Paper} sx={{ maxHeight: 'calc(100vh - 145px)', overflow: 'auto' }}>
+        <Table stickyHeader sx={{ tableLayout: 'fixed' }}>
           <TableHead sx={{ backgroundColor: '#f0f0f0' }}>
             <TableRow>
-              <TableCell align="left" sx={{ width: '15%', py: 1 }}>CÓDIGO</TableCell>
-              <TableCell align="left" sx={{ width: '50%', py: 1 }}>NOME DO PRODUTO</TableCell>
-              <TableCell align="center" sx={{ width: '20%', py: 1 }}>QUANTIDADE</TableCell>
-              <TableCell align="center" sx={{ width: '15%', py: 1 }}>AÇÃO</TableCell>
+              <TableCell align="left" sx={{ width: isMobile ? '20%' : '15%', py: 1 }}>CÓDIGO</TableCell>
+              <TableCell align="left" sx={{ width: isMobile ? '40%' : '50%', py: 1 }}>NOME DO PRODUTO</TableCell>
+              <TableCell align="center" sx={{ width: isMobile ? '20%' : '20%', py: 1 }}>ESTOQUE</TableCell>
+              <TableCell align="center" sx={{ width: isMobile ? '20%' : '15%', py: 1 }}>AÇÃO</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -25,7 +31,7 @@ export default function TabelaDeProdutosMobile({ produtosFiltrados, handleAbrirM
                 <TableCell align="center" sx={{ py: 1 }}>
                   <Button
                     variant="contained"
-                    onClick={() => handleAbrirModalEdicao(produto)}
+                    onClick={() => handleEditClick(produto)}
                     sx={{
                       minWidth: 50,
                       height: 50,
@@ -37,7 +43,7 @@ export default function TabelaDeProdutosMobile({ produtosFiltrados, handleAbrirM
                     }}
                   >
                     <EditIcon />
-                    <span style={{ marginLeft: 5 , padding: 2}}>EDITAR</span>
+                    {!isMobile && <span style={{ marginLeft: 5, padding: 2 }}>EDITAR</span>}
                   </Button>
                 </TableCell>
               </TableRow>
@@ -47,4 +53,6 @@ export default function TabelaDeProdutosMobile({ produtosFiltrados, handleAbrirM
       </TableContainer>
     </Box>
   );
-}
+};
+
+export default React.memo(TabelaDeProdutos);

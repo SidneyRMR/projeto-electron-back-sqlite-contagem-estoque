@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import { Container, Box } from '@mui/material';
 import BarraDeBusca from './components/BarraDeBusca';
@@ -6,7 +6,6 @@ import TabelaDeProdutosMobile from './components/TabelaDeProdutosMobile';
 import ModalEditarProduto from './components/ModalEditarProduto';
 import Header from './components/Header';
 import { gerarRelatorioPDF } from './utils/pdfUtils';
-import LeitorCodigoBarras from './components/LeitorCodigoBarras'; // Importe o componente
 
 export default function MobileApp() {
   const [termoBuscaNome, setTermoBuscaNome] = useState('');
@@ -18,7 +17,6 @@ export default function MobileApp() {
   const [produtoAtual, setProdutoAtual] = useState(null);
   const [quantidade, setQuantidade] = useState(0);
   const [enderecoLocalIP, setEnderecoLocalIP] = useState('');
-  const refInputQuantidade = useRef(null);
 
   useEffect(() => {
     const carregarDadosIniciais = async () => {
@@ -37,7 +35,7 @@ export default function MobileApp() {
     carregarDadosIniciais();
   }, []);
 
-  const buscarEnderecoLocalIP = async () => {
+  const buscarEnderecoLocalIP = useCallback(async () => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const enderecoIP = urlParams.get('enderecoLocalIP');
@@ -46,9 +44,9 @@ export default function MobileApp() {
       console.error('Erro ao buscar o endereço IP local:', error);
       throw error;
     }
-  };
+  }, []);
 
-  const buscarProdutos = async (enderecoIP) => {
+  const buscarProdutos = useCallback(async (enderecoIP) => {
     try {
       const response = await axios.get(`http://${enderecoIP}:5000/api/produtos`);
       return response.data;
@@ -56,9 +54,9 @@ export default function MobileApp() {
       console.error('Erro ao buscar os produtos:', error);
       throw error;
     }
-  };
+  }, []);
 
-  const handleEnvioQuantidade = async () => {
+  const handleEnvioQuantidade = useCallback(async () => {
     try {
       if (produtoAtual) {
         const response = await axios.put(`http://${enderecoLocalIP}:5000/api/produtos/${produtoAtual.id}`, {
@@ -86,19 +84,19 @@ export default function MobileApp() {
     } catch (error) {
       console.error('Erro ao atualizar a quantidade do produto:', error);
     }
-  };
+  }, [produtoAtual, quantidade, enderecoLocalIP, produtos]);
 
-  const handleMudancaBuscaNome = (event) => {
+  const handleMudancaBuscaNome = useCallback((event) => {
     setTermoBuscaNome(event.target.value);
     filtrarProdutos(event.target.value, termoBuscaCodigo, 'name');
-  };
+  }, [termoBuscaCodigo]);
 
-  const handleMudancaBuscaCodigo = (event) => {
+  const handleMudancaBuscaCodigo = useCallback((event) => {
     setTermoBuscaCodigo(event.target.value);
     filtrarProdutos(termoBuscaNome, event.target.value, 'code');
-  };
+  }, [termoBuscaNome]);
 
-  const filtrarProdutos = (nome, codigo, tipo) => {
+  const filtrarProdutos = useCallback((nome, codigo, tipo) => {
     let filtrados = [];
     if (tipo === 'name') {
       filtrados = produtos.filter(produto =>
@@ -110,9 +108,9 @@ export default function MobileApp() {
       );
     }
     setProdutosFiltrados(filtrados);
-  };
+  }, [produtos]);
 
-  const handleLeituraCodigoBarras = (data) => {
+  const handleLeituraCodigoBarras = useCallback((data) => {
     const produtoEncontrado = produtos.find(produto => produto.EAN === data);
     if (produtoEncontrado) {
       setProdutoAtual(produtoEncontrado);
@@ -120,18 +118,31 @@ export default function MobileApp() {
     } else {
       alert('Produto não encontrado.');
     }
-  };
+  }, [produtos]);
 
-  const handleAbrirModalEdicao = (produto) => {
+  const handleAbrirModalEdicao = useCallback((produto) => {
     setProdutoAtual(produto);
     setQuantidade(produto.estoque_atual);
     setModalEdicaoAberto(true);
-  };
+  }, []);
+
+  const modalStyle = useMemo(() => ({
+    position: 'absolute',
+    top: '40%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: '90%', // Largura responsiva
+    maxWidth: 400, // Largura máxima para telas maiores
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 2,
+  }), []);
 
   return (
-    <Container>
+    <Container sx={{ p: 0, m: 0 }}>
       <Header gerarRelatorioPDF={() => gerarRelatorioPDF(produtosFiltrados)} />
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ p: 1, marginTop: 0 }}>
         <BarraDeBusca
           termoBuscaNome={termoBuscaNome}
           termoBuscaCodigo={termoBuscaCodigo}
@@ -146,14 +157,13 @@ export default function MobileApp() {
         />
         <ModalEditarProduto
           modalEdicaoAberto={modalEdicaoAberto}
-          afterOpenModalEdicao={() => refInputQuantidade.current && refInputQuantidade.current.focus()}
           setModalEdicaoAberto={setModalEdicaoAberto}
+          afterOpenModalEdicao={() => document.getElementById('quantidade-input')?.focus()}
           produtoAtual={produtoAtual}
           quantidade={quantidade}
           setQuantidade={setQuantidade}
           handleEnvioQuantidade={handleEnvioQuantidade}
           handleKeyDown={(e) => e.key === 'Enter' && handleEnvioQuantidade()}
-          refInputQuantidade={refInputQuantidade}
         />
       </Box>
     </Container>

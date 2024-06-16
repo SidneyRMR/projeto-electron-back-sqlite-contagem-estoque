@@ -14,10 +14,10 @@ export default function ModalQRCode({ modalAberto, setModalAberto, enderecoLocal
             ACESSO MOBILE
           </Typography>
         </Toolbar>
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
           <QRCode value={`http://${enderecoLocalIP}:3000/mobileApp?enderecoLocalIP=${enderecoLocalIP}`} />
         </Box>
-        <Box sx={{ textAlign: 'center', mt: 2 }}>
+        <Box sx={{ textAlign: 'center', mt: 1 }}>
           <Button onClick={() => setModalAberto(false)} variant="contained">
             Fechar
           </Button>
@@ -29,12 +29,12 @@ export default function ModalQRCode({ modalAberto, setModalAberto, enderecoLocal
 
 const modalStyle = {
   position: 'absolute',
-  top: '50%',
+  top: '40%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
   width: 400,
   bgcolor: 'background.paper',
   border: '2px solid #000',
   boxShadow: 24,
-  p: 4,
+  p: 2,
 };

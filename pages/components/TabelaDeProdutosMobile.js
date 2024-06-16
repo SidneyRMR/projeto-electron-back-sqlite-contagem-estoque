@@ -18,45 +18,45 @@ export default function TabelaDeProdutosMobile({ produtosFiltrados, handleAbrirM
   };
 
   return (
-    <TableContainer component={Paper} sx={{ maxHeight: 'calc(100vh - 150px)', overflow: 'auto' }}>
-      <Table stickyHeader sx={{ width: '100%', tableLayout: 'fixed' }}>
+    <TableContainer component={Paper} sx={{ maxHeight: 'calc(93vh - 150px)', overflow: 'auto' }}>
+      <Table stickyHeader sx={{ tableLayout: 'fixed' }}>
         <TableHead>
           <TableRow>
-            <TableCell align="left" sx={{ width: '15%', py: 1 }}>
+            <TableCell align="left" sx={{ width:'20%', py: 1 }}>
               <TableSortLabel
                 active={orderBy === 'codigo'}
                 direction={orderBy === 'codigo' ? order : 'asc'}
                 onClick={() => handleRequestSort('codigo')}
-                sx={{ color: 'text.primary', minWidth: 120 }}
-                IconComponent={order === 'desc' ? ArrowDownwardIcon : ArrowUpwardIcon}
+                sx={{ color: 'text.primary' }}
+                IconComponent={order === 'asc' ? ArrowUpwardIcon : ArrowDownwardIcon}
               >
-                Cód
+                CÓD
               </TableSortLabel>
             </TableCell>
-            <TableCell align="left" sx={{ width: '40%', py: 1 }}>
+            <TableCell align="left" sx={{ width:'40%', py: 1 }}>
               <TableSortLabel
                 active={orderBy === 'nome'}
                 direction={orderBy === 'nome' ? order : 'asc'}
                 onClick={() => handleRequestSort('nome')}
-                sx={{ color: 'text.primary', minWidth: 300, width: '50%', py: 1 }} // Aumentado para 300 para mais espaço no nome do produto
-                IconComponent={order === 'desc' ? ArrowDownwardIcon : ArrowUpwardIcon}
+                sx={{ color: 'text.primary' }}
+                IconComponent={order === 'asc' ? ArrowUpwardIcon : ArrowDownwardIcon}
               >
-                Nome do Produto
+                PRODUTO
               </TableSortLabel>
-            </TableCell >
-            <TableCell align="center" sx={{ width: '20%', py: 1 }}>
+            </TableCell>
+            <TableCell align="left" sx={{ width: '20%', py: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <TableSortLabel
                 active={orderBy === 'estoque_atual'}
                 direction={orderBy === 'estoque_atual' ? order : 'asc'}
                 onClick={() => handleRequestSort('estoque_atual')}
-                sx={{ color: 'text.primary', minWidth: 120 }}
-                IconComponent={order === 'desc' ? ArrowDownwardIcon : ArrowUpwardIcon}
+                sx={{ color: 'text.primary' }}
+                IconComponent={order === 'asc' ? ArrowUpwardIcon : ArrowDownwardIcon}
               >
-                Quantidade
+                ESTOQUE
               </TableSortLabel>
             </TableCell>
-            <TableCell align="left" sx={{ width: '25%', py: 1 }}>
-              Ação
+            <TableCell align="center" sx={{ width: '20%', py: 1 }}>
+              AÇÃO
             </TableCell>
           </TableRow>
         </TableHead>
@@ -69,7 +69,6 @@ export default function TabelaDeProdutosMobile({ produtosFiltrados, handleAbrirM
                   ? a[orderBy] - b[orderBy]
                   : b[orderBy] - a[orderBy];
               } else {
-                // Ordenação por string
                 return isAsc
                   ? a[orderBy].localeCompare(b[orderBy])
                   : b[orderBy].localeCompare(a[orderBy]);
@@ -77,23 +76,24 @@ export default function TabelaDeProdutosMobile({ produtosFiltrados, handleAbrirM
             })
             .map((produto) => (
               <TableRow key={produto.id}>
-                <TableCell>{produto.codigo}</TableCell>
-                <TableCell>{produto.nome}</TableCell>
-                <TableCell align="center">{produto.estoque_atual || 0}</TableCell>
-                <TableCell align="left" sx={{ width: '25%', py: 1 }}>
+                <TableCell align="left" sx={{ py: 1 }}>{produto.codigo}</TableCell>
+                <TableCell align="left" sx={{ py: 1 }}>{produto.nome}</TableCell>
+                <TableCell align="center" sx={{ py: 1 }}>{produto.estoque_atual || 0}</TableCell>
+                <TableCell align="center" sx={{ py: 1 }}>
                   <Button
                     variant="contained"
                     onClick={() => handleAbrirModalEdicao(produto)}
                     sx={{
-                      minWidth: 50,
-                      height: 50,
+                      minWidth: 40,
+                      height: 40,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      padding: 0
+                      padding: 0,
+                      margin: 'auto'
                     }}
                   >
-                    <EditIcon />
+                    <EditIcon fontSize="small" />
                   </Button>
                 </TableCell>
               </TableRow>
