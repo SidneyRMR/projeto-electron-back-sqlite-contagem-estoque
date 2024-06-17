@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Box, Typography, Button, Toolbar } from '@mui/material';
 import QRCode from 'react-qr-code';
+import ScannerCodigoBarras from './ScannerCodigoBarras';
 
 export default function ModalQRCode({ modalAberto, setModalAberto, enderecoLocalIP }) {
+  const [result, setResult] = useState('');
+
   return (
     <Modal
       open={modalAberto}
@@ -16,6 +19,7 @@ export default function ModalQRCode({ modalAberto, setModalAberto, enderecoLocal
         </Toolbar>
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
           <QRCode value={`http://${enderecoLocalIP}:3000/mobileApp?enderecoLocalIP=${enderecoLocalIP}`} />
+          {/* <ScannerCodigoBarras/> */}
         </Box>
         <Box sx={{ textAlign: 'center', mt: 1 }}>
           <Button onClick={() => setModalAberto(false)} variant="contained">

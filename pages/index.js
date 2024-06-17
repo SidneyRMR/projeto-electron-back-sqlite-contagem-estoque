@@ -25,16 +25,16 @@ export default function DesktopApp() {
     buscarProdutos();
   }, []);
 
-  const buscarEnderecoLocalIP = useCallback(async () => {
+  const buscarEnderecoLocalIP = async () => {
     try {
       const response = await axios.get(`http://localhost:5000/api/getLocalIP`);
       setEnderecoLocalIP(response.data.ip);
     } catch (error) {
       console.error('Erro ao buscar o endereço IP local:', error);
     }
-  }, []);
+  };
 
-  const buscarProdutos = useCallback(async () => {
+  const buscarProdutos = async () => {
     try {
       const response = await axios.get(`http://localhost:5000/api/produtos`);
       setProdutos(response.data);
@@ -42,19 +42,19 @@ export default function DesktopApp() {
     } catch (error) {
       console.error('Erro ao buscar os produtos:', error);
     }
-  }, []);
+  };
 
-  const handleMudancaBuscaNome = useCallback((event) => {
+  const handleMudancaBuscaNome = (event) => {
     setTermoBuscaNome(event.target.value);
     filtrarProdutos(event.target.value, termoBuscaCodigo, 'name');
-  }, [termoBuscaCodigo]);
+  };
 
-  const handleMudancaBuscaCodigo = useCallback((event) => {
+  const handleMudancaBuscaCodigo = (event) => {
     setTermoBuscaCodigo(event.target.value);
     filtrarProdutos(termoBuscaNome, event.target.value, 'code');
-  }, [termoBuscaNome]);
+  };
 
-  const filtrarProdutos = useCallback((nome, codigo, tipo) => {
+  const filtrarProdutos = (nome, codigo, tipo) => {
     let filtrados = [];
     if (tipo === 'name') {
       filtrados = produtos.filter(produto =>
@@ -66,9 +66,9 @@ export default function DesktopApp() {
       );
     }
     setProdutosFiltrados(filtrados);
-  }, [produtos]);
+  };
 
-  const handleEnvioQuantidade = useCallback(async () => {
+  const handleEnvioQuantidade = async () => {
     if (produtoAtual) {
       try {
         await axios.put(`http://localhost:5000/api/produtos/${produtoAtual.id}`, {
@@ -82,13 +82,13 @@ export default function DesktopApp() {
         console.error('Erro ao atualizar a quantidade do produto:', error);
       }
     }
-  }, [produtoAtual, quantidade, buscarProdutos]);
+  };
 
-  const handleAbrirModalEdicao = useCallback((produto) => {
+  const handleAbrirModalEdicao = (produto) => {
     setProdutoAtual(produto);
     setQuantidade(produto.estoque_atual);
     setModalEdicaoAberto(true);
-  }, []);
+  };
 
   const modalStyle = useMemo(() => ({
     position: 'absolute',

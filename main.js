@@ -1,22 +1,19 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 
+let mainWindow;
+
 function createWindow() {
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1200,
     height: 1000,
     frame: true, // Manter a moldura da janela
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: true, // Certifique-se de que a integração de node está desativada
+      nodeIntegration: false, // Certifique-se de que a integração de node está desativada
       contextIsolation: true, // Certifique-se de que o isolamento de contexto está ativado
     },
-    icon: {
-      // Caminho para os ícones da janela nas diferentes dimensões
-      ico: path.join(__dirname, '/logo16x16.ico'),
-      ico32: path.join(__dirname, '/logo32x32.ico'),
-      ico48: path.join(__dirname, '/logo48x48.ico'),
-    },
+    icon: path.join(__dirname, 'logo16x16.ico'), // Caminho para o ícone da janela
   });
 
   // Define o título da janela

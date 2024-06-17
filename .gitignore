@@ -3,6 +3,7 @@
 # dependencies
 /node_modules
 /backend/node_modules
+
 /.pnp
 .pnp.js
 .yarn/install-state.gz
@@ -35,3 +36,18 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# public 
+/public/ean.pdf
+/public/produtosEan.txt
+/public/ean.txt
+/public/produtosEanLimpo.txt
+/public/produtos.txt
+
+pythonAdicionaEan.py
+pythonCriaBdJson.py
+pythonCriaBdTxt.py
+pythonExtracaoTxteLimpeza.py
+pythonOrdenacaoTxt.py
+pythonSalvarEanNoBd.py
+pythonMerge.py

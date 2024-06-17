@@ -44,8 +44,8 @@ export default function TabelaDeProdutosMobile({ produtosFiltrados, handleAbrirM
                 PRODUTO
               </TableSortLabel>
             </TableCell>
-            <TableCell align="left" sx={{ width: '20%', py: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <TableSortLabel
+            <TableCell align="center" sx={{ width: '20%', py: 1 }}>ESTOQUE  </TableCell>
+              {/* <TableSortLabel
                 active={orderBy === 'estoque_atual'}
                 direction={orderBy === 'estoque_atual' ? order : 'asc'}
                 onClick={() => handleRequestSort('estoque_atual')}
@@ -53,8 +53,8 @@ export default function TabelaDeProdutosMobile({ produtosFiltrados, handleAbrirM
                 IconComponent={order === 'asc' ? ArrowUpwardIcon : ArrowDownwardIcon}
               >
                 ESTOQUE
-              </TableSortLabel>
-            </TableCell>
+              </TableSortLabel> */}
+            {/* </TableCell> */}
             <TableCell align="center" sx={{ width: '20%', py: 1 }}>
               AÇÃO
             </TableCell>

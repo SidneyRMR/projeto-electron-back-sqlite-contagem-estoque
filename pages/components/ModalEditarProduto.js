@@ -23,7 +23,7 @@ const ModalEditarProduto = ({
   handleKeyDown,
 }) => {
   const theme = useTheme();
-  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  // const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   const handleClose = useCallback(() => setModalEdicaoAberto(false), [setModalEdicaoAberto]);
   const handleChange = useCallback((e) => setQuantidade(e.target.value), [setQuantidade]);
@@ -49,7 +49,7 @@ const ModalEditarProduto = ({
       open={modalEdicaoAberto}
       onClose={handleClose}
       onAfterOpen={afterOpenModalEdicao}
-      fullScreen={fullScreen}
+      // fullScreen={fullScreen}
     >
       <Box sx={modalStyle}>
         <Toolbar sx={{ bgcolor: 'primary.main', justifyContent: 'center', m: 0, p: 0 }}>
@@ -72,19 +72,19 @@ const ModalEditarProduto = ({
             <Box sx={{ mt: 2, textAlign: 'center' }}>
               <Button
                 variant="contained"
-                onClick={handleEnvioQuantidade}
-                startIcon={<SaveIcon />} // Ícone do Material-UI para Salvar
-                sx={{ width: '120px', height: '48px', margin: '8px' }} // Ajustando tamanho e margem
-              >
-                Salvar
-              </Button>
-              <Button
-                variant="outlined"
                 onClick={handleClose}
                 startIcon={<CancelIcon />} // Ícone do Material-UI para Cancelar
-                sx={{ width: '120px', height: '48px', margin: '8px' }} // Ajustando tamanho e margem
+                sx={{ width: '120px', height: '48px', margin: '8px', bgcolor: 'secondary.main', color:'#FFFFFF'}} // Ajustando tamanho e margem
               >
                 Cancelar
+              </Button>
+              <Button
+                variant="contained"
+                onClick={handleEnvioQuantidade}
+                startIcon={<SaveIcon />} // Ícone do Material-UI para Salvar
+                sx={{ width: '120px', height: '48px', margin: '8px', bgcolor: 'primary.main' }} // Ajustando tamanho e margem
+              >
+                Salvar
               </Button>
             </Box>
           </>

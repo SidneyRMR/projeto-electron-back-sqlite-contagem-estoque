@@ -35,7 +35,8 @@ export default function MobileApp() {
     carregarDadosIniciais();
   }, []);
 
-  const buscarEnderecoLocalIP = useCallback(async () => {
+
+  const buscarEnderecoLocalIP = async () => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const enderecoIP = urlParams.get('enderecoLocalIP');
@@ -44,9 +45,9 @@ export default function MobileApp() {
       console.error('Erro ao buscar o endereço IP local:', error);
       throw error;
     }
-  }, []);
+  };
 
-  const buscarProdutos = useCallback(async (enderecoIP) => {
+  const buscarProdutos = async (enderecoIP) => {
     try {
       const response = await axios.get(`http://${enderecoIP}:5000/api/produtos`);
       return response.data;
@@ -54,9 +55,9 @@ export default function MobileApp() {
       console.error('Erro ao buscar os produtos:', error);
       throw error;
     }
-  }, []);
+  };
 
-  const handleEnvioQuantidade = useCallback(async () => {
+  const handleEnvioQuantidade = async () => {
     try {
       if (produtoAtual) {
         const response = await axios.put(`http://${enderecoLocalIP}:5000/api/produtos/${produtoAtual.id}`, {
@@ -84,19 +85,19 @@ export default function MobileApp() {
     } catch (error) {
       console.error('Erro ao atualizar a quantidade do produto:', error);
     }
-  }, [produtoAtual, quantidade, enderecoLocalIP, produtos]);
+  };
 
-  const handleMudancaBuscaNome = useCallback((event) => {
+  const handleMudancaBuscaNome = (event) => {
     setTermoBuscaNome(event.target.value);
     filtrarProdutos(event.target.value, termoBuscaCodigo, 'name');
-  }, [termoBuscaCodigo]);
+  };
 
-  const handleMudancaBuscaCodigo = useCallback((event) => {
+  const handleMudancaBuscaCodigo = (event) => {
     setTermoBuscaCodigo(event.target.value);
     filtrarProdutos(termoBuscaNome, event.target.value, 'code');
-  }, [termoBuscaNome]);
+  };
 
-  const filtrarProdutos = useCallback((nome, codigo, tipo) => {
+  const filtrarProdutos = (nome, codigo, tipo) => {
     let filtrados = [];
     if (tipo === 'name') {
       filtrados = produtos.filter(produto =>
@@ -108,9 +109,9 @@ export default function MobileApp() {
       );
     }
     setProdutosFiltrados(filtrados);
-  }, [produtos]);
+  };
 
-  const handleLeituraCodigoBarras = useCallback((data) => {
+  const handleLeituraCodigoBarras = (data) => {
     const produtoEncontrado = produtos.find(produto => produto.EAN === data);
     if (produtoEncontrado) {
       setProdutoAtual(produtoEncontrado);
@@ -118,13 +119,13 @@ export default function MobileApp() {
     } else {
       alert('Produto não encontrado.');
     }
-  }, [produtos]);
+  };
 
-  const handleAbrirModalEdicao = useCallback((produto) => {
+  const handleAbrirModalEdicao = (produto) => {
     setProdutoAtual(produto);
     setQuantidade(produto.estoque_atual);
     setModalEdicaoAberto(true);
-  }, []);
+  };
 
   const modalStyle = useMemo(() => ({
     position: 'absolute',

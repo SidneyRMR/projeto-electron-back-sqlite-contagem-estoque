@@ -48,7 +48,7 @@ export default function BarraDeBusca({
   };
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 1 }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', margin: 1 }}>
       <TextField
         label="ID"
         value={termoBuscaCodigo}
@@ -85,6 +85,28 @@ export default function BarraDeBusca({
           />
         </>
       ) : (
+        <>
+            <Button
+            variant="contained"
+            onClick={handleAbrirLeitor}
+            sx={{
+              minWidth: 56,
+              height: 56,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 2,
+              marginRight: 1
+            }}
+          >
+            <ScannerIcon />
+            <span style={{ margin: "10px" }}>Leitor</span>
+          </Button>
+        <ModalCodigoBarras
+            onDetected={handleDetected}
+            modalAberto={modalAberto}
+            setModalAberto={setModalAberto}
+          />
         <Button
           variant="contained"
           onClick={handleAbrirModal}
@@ -96,10 +118,12 @@ export default function BarraDeBusca({
             justifyContent: 'center',
             paddingLeft: 2
           }}
-        >
+          >
           <QrCodeIcon />
           <span style={{ margin: "10px" }}>MOBILE</span>
         </Button>
+
+          </>
       )}
     </Box>
   );
