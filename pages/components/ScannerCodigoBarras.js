@@ -86,7 +86,17 @@ export default function BarcodeScanner() {
         </div>
 
         <div>
-          <video id="video" width="300" height="200" style={{ border: "1px solid gray" }}></video>
+        <video
+  id="video"
+  style={{
+    width: "100%",
+    height: "100%",
+    border: "2px solid gray",
+    objectFit: "cover", // Preenche o espaço sem distorcer a imagem
+    transform: "scale(1.0)" // Exemplo de ajuste de zoom (aumenta em 20%)
+  }}
+></video>
+
         </div>
 
         <div id="sourceSelectPanel" style={{ display: videoInputDevices.length > 1 ? "block" : "none" }}>
