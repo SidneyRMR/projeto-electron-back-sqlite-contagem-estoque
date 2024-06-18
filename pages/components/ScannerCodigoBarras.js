@@ -5,16 +5,16 @@ import {
   BarcodeFormat,
   NotFoundException
 } from "@zxing/library";
-import { useMediaQuery, useTheme, Box, Button, InputLabel, Select, MenuItem, Typography } from "@mui/material";
+import { useMediaQuery, useTheme, Box, Button, InputLabel, Select, MenuItem, Typography, Grid } from "@mui/material";
 
-export default function BarcodeScanner() {
+export default function BarcodeScanner({handleClose}) {
   const [selectedDeviceId, setSelectedDeviceId] = useState("");
   const [videoInputDevices, setVideoInputDevices] = useState([]);
   const [code, setCode] = useState("");
   const codeReader = new BrowserMultiFormatReader();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const videoRef = useRef(null); // Referência para o elemento <video>
+  const videoRef = useRef(null);
 
   useEffect(() => {
     const listVideoDevices = async () => {
@@ -86,19 +86,13 @@ export default function BarcodeScanner() {
     }
     codeReader.reset();
     setSelectedDeviceId("");
+    handleClose()
   };
+  
 
   return (
     <main className="wrapper" style={{ paddingTop: "2em" }}>
       <section className="container" id="demo-content">
-        <div>
-          <button className="button" id="startButton" onClick={startScan}>
-            Start
-          </button>
-          <button className="button" id="resetButton" onClick={resetScan}>
-            Reset
-          </button>
-        </div>
 
         <div style={{ position: "relative" }}>
           <video
@@ -131,7 +125,7 @@ export default function BarcodeScanner() {
           id="sourceSelectPanel"
           sx={{ display: videoInputDevices.length > 1 ? "block" : "none", mt: 0 }}
         >
-          <InputLabel htmlFor="sourceSelect" sx={{ mb: 0 }}>Mudar câmera:</InputLabel>
+          {/* <InputLabel htmlFor="sourceSelect" sx={{ mb: 0 }}>Mudar câmera:</InputLabel> */}
           <Select
             id="sourceSelect"
             value={selectedDeviceId}
@@ -149,19 +143,30 @@ export default function BarcodeScanner() {
           </Select>
         </Box>
 
-        <InputLabel htmlFor="sourceSelect" sx={{ mb: 0 }}>Codigo Lido:</InputLabel>
-        <Box sx={{ border: "1px solid #ccc", borderRadius: "4px", p: 1, mt: 0 }}>
-          <code>{code ? code : "Nenhum código lido"}</code>
+        {/* <InputLabel htmlFor="sourceSelect" sx={{ mb: 0 }}>Codigo Lido:</InputLabel> */}
+        <Box sx={{ border: "1px solid #ccc", borderRadius: "4px", p: 1, mt: 1, marginBotton:0 }}>
+          <code>Codigo Lido: {code ? code : "Nenhum código lido"}</code>
 
         </Box>
       </section>
-      <Box sx={{ textAlign: 'center', mt: 0 }}>
-        <Button variant="contained" color="primary" onClick={resetScan} sx={{ m: 1 }}>
-          Reset
-        </Button>
-        <Button variant="contained" color="secondary" onClick={stopStream} sx={{ m: 1 }}>
-          Fechar Câmera
-        </Button>
+      <Box sx={{ textAlign: 'center', mt: 1 }}>
+      <Grid container justifyContent="space-between" spacing={0.5}>
+        <Grid item>
+          <Button variant="contained" color="primary" onClick={startScan} sx={{width:100}}>
+            Ler 
+          </Button>
+        </Grid>
+        <Grid item>
+          <Button variant="contained" color="primary" onClick={resetScan} sx={{width:100}}>
+            Limpar
+          </Button>
+        </Grid>
+        <Grid item>
+          <Button variant="contained" color="secondary" onClick={stopStream} sx={{width:100}}>
+            Fechar
+          </Button>
+        </Grid>
+      </Grid>
       </Box>
     </main>
   );

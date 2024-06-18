@@ -22,13 +22,13 @@ const ModalCodigoBarras = ({ onDetected, modalAberto, setModalAberto }) => {
           </Typography>
         </Toolbar>
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
-          <ScannerCodigoBarras />
+          <ScannerCodigoBarras handleClose={handleClose}/>
         </Box>
-        <Box sx={{ textAlign: 'center', mt: 0 }}>
+        {/* <Box sx={{ textAlign: 'center', mt: 0 }}>
           <Button onClick={() => setModalAberto(false)} variant="contained">
             Fechar
           </Button>
-        </Box>
+        </Box> */}
       </Box>
     </Modal>
   );
