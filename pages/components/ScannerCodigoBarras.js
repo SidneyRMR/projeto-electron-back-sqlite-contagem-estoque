@@ -28,17 +28,18 @@ export default function BarcodeScanner() {
           setSelectedDeviceId(devices.length > 0 ? devices[0].deviceId : "");
         }
       } catch (error) {
-        console.error("Error listing video devices:", error);
+        console.error("Erro ao listar dispositivos:", error);
       }
     };
 
     listVideoDevices();
 
     return () => {
+      stopStream();
       codeReader.reset();
       setCode("");
     };
-  }, [isMobile]); // Incluir isMobile no array de dependências se afetar a lógica de seleção de dispositivo
+  }, []);
 
   const startScan = () => {
     if (selectedDeviceId) {
@@ -55,13 +56,13 @@ export default function BarcodeScanner() {
             setCode(result.text);
           }
           if (error && !(error instanceof NotFoundException)) {
-            console.error("Decode error:", error);
+            console.error("Erro de decodificação:", error);
             setCode("");
           }
         },
         hints
       );
-      console.log(`Started continuous decode from camera with id ${selectedDeviceId}`);
+      console.log(`Usando dispositivo ${selectedDeviceId} par ler o código de barras`);
     }
   };
 
@@ -128,9 +129,9 @@ export default function BarcodeScanner() {
 
         <Box
           id="sourceSelectPanel"
-          sx={{ display: videoInputDevices.length > 1 ? "block" : "none", mt: 2 }}
+          sx={{ display: videoInputDevices.length > 1 ? "block" : "none", mt: 0 }}
         >
-          <InputLabel htmlFor="sourceSelect" sx={{ mb: 1 }}>Change video source:</InputLabel>
+          <InputLabel htmlFor="sourceSelect" sx={{ mb: 0 }}>Mudar câmera:</InputLabel>
           <Select
             id="sourceSelect"
             value={selectedDeviceId}
@@ -138,7 +139,7 @@ export default function BarcodeScanner() {
             fullWidth
             variant="outlined"
             size="small"
-            sx={{ maxWidth: "400px" }}
+            // sx={{ maxWidth: "400px" }}
           >
             {videoInputDevices.map((device) => (
               <MenuItem key={device.deviceId} value={device.deviceId}>
@@ -148,9 +149,10 @@ export default function BarcodeScanner() {
           </Select>
         </Box>
 
-        <Typography variant="h6" sx={{ mt: 2 }}>Codigo Lido:</Typography>
-        <Box sx={{ border: "1px solid #ccc", borderRadius: "4px", p: 1, mt: 1 }}>
-          <code>{code}</code>
+        <InputLabel htmlFor="sourceSelect" sx={{ mb: 0 }}>Codigo Lido:</InputLabel>
+        <Box sx={{ border: "1px solid #ccc", borderRadius: "4px", p: 1, mt: 0 }}>
+          <code>{code ? code : "Nenhum código lido"}</code>
+
         </Box>
       </section>
       <Box sx={{ textAlign: 'center', mt: 0 }}>
