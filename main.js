@@ -7,22 +7,20 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 1000,
-    frame: true, // Manter a moldura da janela
+    frame: true,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      nodeIntegration: false, // Certifique-se de que a integração de node está desativada
-      contextIsolation: true, // Certifique-se de que o isolamento de contexto está ativado
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js')
     },
-    icon: path.join(__dirname, 'logo16x16.ico'), // Caminho para o ícone da janela
+    icon: path.join(__dirname, './public/logo16x16.ico'),
   });
 
-  // Define o título da janela
   mainWindow.setTitle('Gestão de Estoque');
+  mainWindow.setMenu(null);
 
-  mainWindow.setMenu(null); // Remove a barra de menu
-
-  // Carrega a aplicação React-Next
-  mainWindow.loadURL('http://localhost:3000'); // Assumindo que o servidor de desenvolvimento React está rodando na porta 3000
+  // Carrega a aplicação React-Next usando HTTPS local
+  mainWindow.loadURL('https://localhost:3000');
 
   mainWindow.on('closed', () => {
     mainWindow = null;

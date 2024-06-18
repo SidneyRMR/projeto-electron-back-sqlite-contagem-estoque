@@ -23,7 +23,7 @@ const TabelaDeProdutos = ({ produtosFiltrados, handleAbrirModalEdicao }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {produtosFiltrados.map((produto) => (
+            {produtosFiltrados && produtosFiltrados.map((produto) => (
               <TableRow key={produto.id}>
                 <TableCell align="left" sx={{ py: 1 }}>{produto.codigo}</TableCell>
                 <TableCell align="left" sx={{ py: 1 }}>{produto.nome}</TableCell>

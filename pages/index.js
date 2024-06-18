@@ -7,7 +7,7 @@ import TabelaDeProdutos from './components/TabelaDeProdutos';
 import ModalEditarProduto from './components/ModalEditarProduto';
 import ModalQRCode from './components/ModalQRCode';
 import Header from './components/Header';
-import { gerarRelatorioPDF } from './utils/pdfUtils';
+import { gerarRelatorioPDF } from '../utils/pdfUtils';
 
 export default function DesktopApp() {
   const [termoBuscaNome, setTermoBuscaNome] = useState('');

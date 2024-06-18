@@ -1,132 +1,106 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import {
   BrowserMultiFormatReader,
-  NotFoundException
+  DecodeHintType,
+  BarcodeFormat, NotFoundException
 } from "@zxing/library";
-import { Button, Select, MenuItem, FormControl, InputLabel, Box } from '@mui/material';
+import { useMediaQuery, useTheme } from '@mui/material';
 
-export default function ScannerCodigoBarras({ handleClose }) {
+
+export default function BarcodeScanner() {
   const [selectedDeviceId, setSelectedDeviceId] = useState("");
-  const [code, setCode] = useState("");
   const [videoInputDevices, setVideoInputDevices] = useState([]);
-
-  const videoRef = useRef(null);
-  const streamRef = useRef(null);
+  const [code, setCode] = useState("");
   const codeReader = new BrowserMultiFormatReader();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const formats = [
+    BarcodeFormat.EAN_13,
+    BarcodeFormat.CODE_128,
+    BarcodeFormat.QR_CODE,
+    // Adicione outros formatos aqui conforme necessário
+  ];
+  const hints = new Map();
+  hints.set(DecodeHintType.POSSIBLE_FORMATS, formats);
+  hints.set(DecodeHintType.TRY_HARDER, true);
 
   useEffect(() => {
-    // Verifica se enumerateDevices é suportado
-    if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
-      navigator.mediaDevices.enumerateDevices()
-        .then(devices => {
-          const videoDevices = devices.filter(device => device.kind === 'videoinput');
-          setVideoInputDevices(videoDevices);
-          if (videoDevices.length > 0) {
-            setSelectedDeviceId(videoDevices[0].deviceId);
-          }
-        })
-        .catch(error => console.error('enumerateDevices error: ', error));
-    } else {
-      console.log('enumerateDevices not supported');
-      // Configuração padrão, caso enumerateDevices não seja suportado
-      setVideoInputDevices([{ deviceId: 'default', label: 'Câmera Padrão' }]);
-      setSelectedDeviceId('default');
-    }
+    const listVideoDevices = async () => {
+      try {
+        const devices = await codeReader.listVideoInputDevices();
+        setVideoInputDevices(devices);
+    
+        if (isMobile) {
+          setSelectedDeviceId(devices.length > 1 ? devices[1].deviceId : "");
+        } else {
+          setSelectedDeviceId(devices.length > 0 ? devices[0].deviceId : "");
+        }
+      } catch (error) {
+        console.error("Error listing video devices:", error);
+      }
+    };
+    
+
+    listVideoDevices();
+
+    return () => {
+      codeReader.reset();
+      setCode("");
+    };
   }, []);
 
-  const resetClick = () => {
+  const startScan = () => {
+    if (selectedDeviceId) {
+      codeReader.decodeFromInputVideoDeviceContinuously(selectedDeviceId, "video", (result, error) => {
+        if (result && result.text) {
+          console.log(`Found ${result.format} code:`, result);
+          setCode(result.text);
+          console.log
+        }
+        if (error && !(error instanceof NotFoundException)) {
+          console.error("Decode error:", error);
+          setCode("");
+        }
+      }, hints);
+      console.log(`Started continuous decode from camera with id ${selectedDeviceId}`);
+    }
+  };
+
+  const resetScan = () => {
     codeReader.reset();
     setCode("");
+    console.log("Reset.");
   };
 
-  const decodeContinuously = (deviceId) => {
-    const constraints = {
-      video: {
-        deviceId: { exact: deviceId }
-      },
-      audio: false
-    };
-
-    // Verifica se getUserMedia é suportado
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
-        const videoElement = videoRef.current;
-        if (videoElement) {
-          videoElement.srcObject = stream;
-          videoElement.play();
-          streamRef.current = stream;
-          codeReader.decodeFromVideoElement(videoElement, (result, err) => {
-            if (result) {
-              console.log("Found QR code!", result);
-              setCode(result.text);
-            }
-            if (err && !(err instanceof NotFoundException)) {
-              console.error(err);
-            }
-          });
-        }
-      }).catch((err) => console.error('getUserMedia error: ', err));
-    } else {
-      console.log('getUserMedia not supported');
-      // Tratamento de erro ou fallback
-      alert('Este navegador não suporta acesso à câmera. Por favor, tente em outro navegador.');
-    }
+  const handleDeviceChange = (e) => {
+    setSelectedDeviceId(e.target.value);
   };
-
-  const stopStream = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-    }
-    codeReader.reset();
-    setSelectedDeviceId("");
-  };
-
-  useEffect(() => {
-    if (selectedDeviceId) {
-      decodeContinuously(selectedDeviceId);
-    } else {
-      stopStream();
-    }
-    return () => {
-      stopStream();
-    };
-  }, [selectedDeviceId]);
 
   return (
-    <main className="wrapper">
-      <FormControl variant="outlined" fullWidth sx={{ textAlign: 'center', marginBottom: 1 }}>
-        <InputLabel id="sourceSelectLabel">Selecione a câmera:</InputLabel>
-        <Select
-          labelId="sourceSelectLabel"
-          id="sourceSelect"
-          value={selectedDeviceId}
-          onChange={(e) => setSelectedDeviceId(e.target.value)}
-          label="Selecione a câmera:"
-        >
-          {videoInputDevices.map((device) => (
-            <MenuItem key={device.deviceId} value={device.deviceId}>
-              {device.label}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+    <main className="wrapper" style={{ paddingTop: "2em" }}>
+      <section className="container" id="demo-content">
+        <div>
+          <button className="button" id="startButton" onClick={startScan}>Start</button>
+          <button className="button" id="resetButton" onClick={resetScan}>Reset</button>
+        </div>
 
-      <div>
-        <video ref={videoRef} id="video" width="100%" height="auto" autoPlay playsInline />
-      </div>
+        <div>
+          <video id="video" width="300" height="200" style={{ border: "1px solid gray" }}></video>
+        </div>
 
-      <label>Result:</label>
-      <pre>
-        <code id="result">{code}</code>
-      </pre>
-      <Box sx={{ textAlign: 'center', mt: 0 }}>
-        <Button variant="contained" color="primary" onClick={resetClick} sx={{ m: 1 }}>
-          Reset
-        </Button>
-        <Button variant="contained" color="secondary" onClick={stopStream} sx={{ m: 1 }}>
-          Fechar Câmera
-        </Button>
-      </Box>
+        <div id="sourceSelectPanel" style={{ display: videoInputDevices.length > 1 ? "block" : "none" }}>
+          <label htmlFor="sourceSelect">Change video source:</label>
+          <select id="sourceSelect" style={{ maxWidth: "400px" }} onChange={handleDeviceChange} value={selectedDeviceId}>
+            {videoInputDevices.map(device => (
+              <option key={device.deviceId} value={device.deviceId}>{device.label}</option>
+            ))}
+          </select>
+        </div>
+
+        <label>Result:</label>
+        <pre><code id="result">{code}</code></pre></section>
+
     </main>
   );
 }

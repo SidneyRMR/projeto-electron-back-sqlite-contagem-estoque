@@ -61,7 +61,7 @@ export default function TabelaDeProdutosMobile({ produtosFiltrados, handleAbrirM
           </TableRow>
         </TableHead>
         <TableBody>
-          {produtosFiltrados
+          {produtosFiltrados && produtosFiltrados
             .sort((a, b) => {
               const isAsc = order === 'asc';
               if (orderBy === 'codigo' || orderBy === 'estoque_atual') {

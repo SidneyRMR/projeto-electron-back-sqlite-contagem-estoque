@@ -3,13 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "main": "main.js",
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "electron": "concurrently \"npm run dev\" \"cd ./backend && npm run dev\" \"wait-on http://localhost:3000 && electron ./",
-    "dist": "next build && electron-builder"
-  },
+"scripts": {
+  "dev": "npm-run-all --sequential start-ngrok start-services",
+  "build": "next build",
+  "start": "next start",
+  "start-frontend": "node server.js",
+  "start-backend": "cd ./backend && npm run dev",
+  "start-ngrok": "node start-ngrok.js",
+  "start-services": "npm-run-all --parallel start-frontend start-backend",
+  "electron": "concurrently \"npm run start\" \"wait-on https://localhost:3000 && electron ./\"",
+  "dist": "npm run build && electron-builder"
+},
+
+
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
@@ -17,17 +23,21 @@
     "@mui/material": "^5.15.20",
     "@zxing/library": "^0.21.1",
     "axios": "^1.7.2",
+    "dotenv": "^16.4.5",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.8.2",
     "next": "14.2.3",
     "next-auth": "^4.24.7",
+    "ngrok": "^5.0.0-beta.2",
     "quagga": "^0.6.16",
     "react": "^18.2.0",
+    "react-barcode-reader": "^0.0.2",
     "react-device-detect": "^2.2.3",
     "react-dom": "^18.2.0",
     "react-icons": "^5.2.1",
     "react-media-devices": "^1.1.5",
     "react-modal": "^3.16.1",
+    "react-qr-barcode-scanner": "^1.0.6",
     "react-qr-code": "^2.0.14",
     "react-webcam": "^7.2.0",
     "react-zxing": "^2.0.0"

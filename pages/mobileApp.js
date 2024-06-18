@@ -5,7 +5,7 @@ import BarraDeBusca from './components/BarraDeBusca';
 import TabelaDeProdutosMobile from './components/TabelaDeProdutosMobile';
 import ModalEditarProduto from './components/ModalEditarProduto';
 import Header from './components/Header';
-import { gerarRelatorioPDF } from './utils/pdfUtils';
+import { gerarRelatorioPDF } from '../utils/pdfUtils';
 
 export default function MobileApp() {
   const [termoBuscaNome, setTermoBuscaNome] = useState('');
@@ -38,8 +38,19 @@ export default function MobileApp() {
 
   const buscarEnderecoLocalIP = async () => {
     try {
-      const urlParams = new URLSearchParams(window.location.search);
+      // Obtenha a string de consulta da URL atual
+      const queryString = window.location.search;
+  
+      // Parse a string de consulta para extrair os parâmetros
+      const urlParams = new URLSearchParams(queryString);
+  
+      // Obtenha o valor do parâmetro enderecoLocalIP
       const enderecoIP = urlParams.get('enderecoLocalIP');
+  
+      if (!enderecoIP) {
+        throw new Error('Parâmetro enderecoLocalIP não encontrado na URL');
+      }
+  
       return enderecoIP;
     } catch (error) {
       console.error('Erro ao buscar o endereço IP local:', error);

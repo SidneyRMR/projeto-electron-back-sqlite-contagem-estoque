@@ -18,7 +18,7 @@ export default function ModalQRCode({ modalAberto, setModalAberto, enderecoLocal
           </Typography>
         </Toolbar>
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
-          <QRCode value={`http://${enderecoLocalIP}:3000/mobileApp?enderecoLocalIP=${enderecoLocalIP}`} />
+          <QRCode value={`https://${enderecoLocalIP}:3000/mobileApp?enderecoLocalIP=${enderecoLocalIP}`} />
           {/* <ScannerCodigoBarras/> */}
         </Box>
         <Box sx={{ textAlign: 'center', mt: 1 }}>
