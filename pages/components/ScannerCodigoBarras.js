@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   BrowserMultiFormatReader,
   DecodeHintType,
   BarcodeFormat,
   NotFoundException
 } from "@zxing/library";
-import { useMediaQuery, useTheme } from "@mui/material";
+import { useMediaQuery, useTheme, Box, Button, InputLabel, Select, MenuItem, Typography } from "@mui/material";
 
 export default function BarcodeScanner() {
   const [selectedDeviceId, setSelectedDeviceId] = useState("");
@@ -14,16 +14,7 @@ export default function BarcodeScanner() {
   const codeReader = new BrowserMultiFormatReader();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
-  const formats = [
-    BarcodeFormat.EAN_13,
-    BarcodeFormat.CODE_128,
-    BarcodeFormat.QR_CODE,
-    // Adicione outros formatos aqui conforme necessário
-  ];
-  const hints = new Map();
-  hints.set(DecodeHintType.PURE_BARCODE, true); // Apenas decodificar códigos de barras (sem processamento de imagem)
-  hints.set(DecodeHintType.TRY_HARDER, true); // Tentar técnicas avançadas para melhorar a detecção
+  const videoRef = useRef(null); // Referência para o elemento <video>
 
   useEffect(() => {
     const listVideoDevices = async () => {
@@ -51,6 +42,10 @@ export default function BarcodeScanner() {
 
   const startScan = () => {
     if (selectedDeviceId) {
+      const formats = [BarcodeFormat.EAN_13];
+      const hints = new Map();
+      hints.set(DecodeHintType.POSSIBLE_FORMATS, formats);
+      
       codeReader.decodeFromInputVideoDeviceContinuously(
         selectedDeviceId,
         "video",
@@ -80,6 +75,18 @@ export default function BarcodeScanner() {
     setSelectedDeviceId(e.target.value);
   };
 
+  const stopStream = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject;
+      const tracks = stream.getTracks();
+
+      tracks.forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    codeReader.reset();
+    setSelectedDeviceId("");
+  };
+
   return (
     <main className="wrapper" style={{ paddingTop: "2em" }}>
       <section className="container" id="demo-content">
@@ -94,13 +101,14 @@ export default function BarcodeScanner() {
 
         <div style={{ position: "relative" }}>
           <video
+            ref={videoRef} // Referência para o elemento <video>
             id="video"
             style={{
               width: "100%",
               height: "100%",
               border: "2px solid gray",
               objectFit: "cover", // Preenche o espaço sem distorcer a imagem
-              transform: "scale(1.0)" // Exemplo de ajuste de zoom (aumenta em 20%)
+              transform: "scale(1.0)" // Ajuste opcional de zoom
             }}
           ></video>
           {/* Quadrado central */}
@@ -118,30 +126,41 @@ export default function BarcodeScanner() {
           ></div>
         </div>
 
-        <div
+        <Box
           id="sourceSelectPanel"
-          style={{ display: videoInputDevices.length > 1 ? "block" : "none" }}
+          sx={{ display: videoInputDevices.length > 1 ? "block" : "none", mt: 2 }}
         >
-          <label htmlFor="sourceSelect">Change video source:</label>
-          <select
+          <InputLabel htmlFor="sourceSelect" sx={{ mb: 1 }}>Change video source:</InputLabel>
+          <Select
             id="sourceSelect"
-            style={{ maxWidth: "400px" }}
-            onChange={handleDeviceChange}
             value={selectedDeviceId}
+            onChange={handleDeviceChange}
+            fullWidth
+            variant="outlined"
+            size="small"
+            sx={{ maxWidth: "400px" }}
           >
             {videoInputDevices.map((device) => (
-              <option key={device.deviceId} value={device.deviceId}>
+              <MenuItem key={device.deviceId} value={device.deviceId}>
                 {device.label}
-              </option>
+              </MenuItem>
             ))}
-          </select>
-        </div>
+          </Select>
+        </Box>
 
-        <label>Result:</label>
-        <pre>
-          <code id="result">{code}</code>
-        </pre>
+        <Typography variant="h6" sx={{ mt: 2 }}>Codigo Lido:</Typography>
+        <Box sx={{ border: "1px solid #ccc", borderRadius: "4px", p: 1, mt: 1 }}>
+          <code>{code}</code>
+        </Box>
       </section>
+      <Box sx={{ textAlign: 'center', mt: 0 }}>
+        <Button variant="contained" color="primary" onClick={resetScan} sx={{ m: 1 }}>
+          Reset
+        </Button>
+        <Button variant="contained" color="secondary" onClick={stopStream} sx={{ m: 1 }}>
+          Fechar Câmera
+        </Button>
+      </Box>
     </main>
   );
 }
