@@ -11,7 +11,8 @@ export default function BarraDeBusca({
   handleMudancaBuscaCodigo,
   handleLeituraCodigoBarras,
   produtosFiltrados,
-  handleAbrirModal
+  handleAbrirModal,
+  onDetected
 }) {
   const [isMobile, setIsMobile] = useState(false);
   const [leitorAberto, setLeitorAberto] = useState(false);
@@ -42,11 +43,7 @@ export default function BarraDeBusca({
     setModalAberto(false);
   };
 
-  const handleDetected = (codigo) => {
-    console.log('Código de barras detectado:', codigo);
-    // Aqui você pode realizar qualquer ação com o código de barras detectado
-    handleFecharLeitor();
-  };
+
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', margin: 1 }}>
@@ -80,7 +77,7 @@ export default function BarraDeBusca({
             <ScannerIcon />
           </Button>
           <ModalCodigoBarras
-            onDetected={handleDetected}
+            onDetected={onDetected}
             modalAberto={modalAberto}
             setModalAberto={setModalAberto}
             produtosFiltrados={produtosFiltrados}
@@ -105,7 +102,7 @@ export default function BarraDeBusca({
             <span style={{ margin: "10px" }}>Leitor</span>
           </Button>
         <ModalCodigoBarras
-            onDetected={handleDetected}
+            onDetected={onDetected}
             modalAberto={modalAberto}
             setModalAberto={setModalAberto}
             produtosFiltrados={produtosFiltrados}

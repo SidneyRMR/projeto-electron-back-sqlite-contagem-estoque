@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.INTEGER,
           allowNull: false
       },
-      EAN: {
+      ean: {
           type: DataTypes.STRING,
           allowNull: false
       }

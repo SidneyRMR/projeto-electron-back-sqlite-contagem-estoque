@@ -84,6 +84,17 @@ export default function DesktopApp() {
     }
   };
 
+  const handleFecharLeitor = () => {
+    //setLeitorAberto(false);
+    setModalAberto(false);
+  };
+
+  const handleDetected = (codigo) => {
+    console.log('Código de barras detectado:', codigo);
+    // Aqui você pode realizar qualquer ação com o código de barras detectado
+    //handleFecharLeitor();
+  };
+
   const handleAbrirModalEdicao = (produto) => {
     setProdutoAtual(produto);
     setQuantidade(produto.estoque_atual);
@@ -113,6 +124,7 @@ export default function DesktopApp() {
       <Header gerarRelatorioPDF={() => gerarRelatorioPDF(produtos)} />
       <Box sx={{ p: 0, marginBottom:0, marginTop:1 }}>
         <BarraDeBusca
+          onDetected={handleDetected} 
           termoBuscaNome={termoBuscaNome}
           termoBuscaCodigo={termoBuscaCodigo}
           handleMudancaBuscaNome={handleMudancaBuscaNome}

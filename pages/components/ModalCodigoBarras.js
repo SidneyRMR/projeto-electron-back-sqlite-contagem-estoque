@@ -11,7 +11,7 @@ const ModalCodigoBarras = ({ onDetected, modalAberto, setModalAberto, produtosFi
   return (
     <Modal
       open={modalAberto}
-      onClose={handleClose}
+      onClose={handleClose} 
       aria-labelledby="modal-title"
       aria-describedby="modal-description"
     >
