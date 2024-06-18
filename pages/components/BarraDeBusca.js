@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, Box, Modal } from '@mui/material';
+import { TextField, Button, Box } from '@mui/material';
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import ScannerIcon from '@mui/icons-material/Scanner';
 import ModalCodigoBarras from './ModalCodigoBarras';
@@ -9,10 +9,9 @@ export default function BarraDeBusca({
   termoBuscaCodigo,
   handleMudancaBuscaNome,
   handleMudancaBuscaCodigo,
-  handleLeituraCodigoBarras,
-  produtosFiltrados,
   handleAbrirModal,
-  onDetected
+  onDetected,
+  produtosFiltrados
 }) {
   const [isMobile, setIsMobile] = useState(false);
   const [leitorAberto, setLeitorAberto] = useState(false);
@@ -42,8 +41,6 @@ export default function BarraDeBusca({
     setLeitorAberto(false);
     setModalAberto(false);
   };
-
-
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', margin: 1 }}>
@@ -85,7 +82,7 @@ export default function BarraDeBusca({
         </>
       ) : (
         <>
-            <Button
+          <Button
             variant="contained"
             onClick={handleAbrirLeitor}
             sx={{
@@ -101,29 +98,29 @@ export default function BarraDeBusca({
             <ScannerIcon />
             <span style={{ margin: "10px" }}>Leitor</span>
           </Button>
-        <ModalCodigoBarras
+          <ModalCodigoBarras
             onDetected={onDetected}
             modalAberto={modalAberto}
             setModalAberto={setModalAberto}
+            handleFecharLeitor={handleFecharLeitor}
             produtosFiltrados={produtosFiltrados}
           />
-        <Button
-          variant="contained"
-          onClick={handleAbrirModal}
-          sx={{
-            minWidth: 56,
-            height: 56,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            paddingLeft: 2
-          }}
+          <Button
+            variant="contained"
+            onClick={handleAbrirModal}
+            sx={{
+              minWidth: 56,
+              height: 56,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingLeft: 2
+            }}
           >
-          <QrCodeIcon />
-          <span style={{ margin: "10px" }}>MOBILE</span>
-        </Button>
-
-          </>
+            <QrCodeIcon />
+            <span style={{ margin: "10px" }}>MOBILE</span>
+          </Button>
+        </>
       )}
     </Box>
   );

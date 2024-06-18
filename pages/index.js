@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { isMobile } from 'react-device-detect';
 import { Box } from '@mui/material';
@@ -85,19 +85,19 @@ export default function DesktopApp() {
   };
 
   const handleFecharLeitor = () => {
-    //setLeitorAberto(false);
     setModalAberto(false);
   };
 
   const handleDetected = (codigo) => {
     console.log('Código de barras detectado:', codigo);
-    // Aqui você pode realizar qualquer ação com o código de barras detectado
-    //handleFecharLeitor();
+    handleFecharLeitor();
+    handleAbrirModalEdicao(codigo);
   };
 
   const handleAbrirModalEdicao = (produto) => {
     setProdutoAtual(produto);
     setQuantidade(produto.estoque_atual);
+    handleFecharLeitor();
     setModalEdicaoAberto(true);
   };
 
@@ -122,14 +122,13 @@ export default function DesktopApp() {
       borderRadius: '0px', // Borda arredondada
     }}>
       <Header gerarRelatorioPDF={() => gerarRelatorioPDF(produtos)} />
-      <Box sx={{ p: 0, marginBottom:0, marginTop:1 }}>
+      <Box sx={{ p: 0, marginBottom: 0, marginTop: 1 }}>
         <BarraDeBusca
-          onDetected={handleDetected} 
+          onDetected={handleDetected}
           termoBuscaNome={termoBuscaNome}
           termoBuscaCodigo={termoBuscaCodigo}
           handleMudancaBuscaNome={handleMudancaBuscaNome}
           handleMudancaBuscaCodigo={handleMudancaBuscaCodigo}
-          //handleLeituraCodigoBarras={handleLeituraCodigoBarras}
           handleAbrirModal={() => setModalAberto(true)}
           isMobile={isMobile}
           produtosFiltrados={produtosFiltrados}

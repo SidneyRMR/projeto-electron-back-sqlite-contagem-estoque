@@ -78,7 +78,7 @@ export default function ScannerCodigoBarras({handleClose, onDetected, produtosFi
       setMessageColor("green");
       onDetected(produto);
 
-      // handleClose();
+      handleClose();
 
     } else {
       console.log("Produto não encontrado!");
