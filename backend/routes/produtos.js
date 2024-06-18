@@ -26,7 +26,7 @@ router.put('/produtos/:id', async (req, res) => {
           return res.status(404).json({ message: 'Produto não encontrado' });
       }
 
-      produto.estoque_atual = estoque_atual;
+      produto.ean = estoque_atual;
       await produto.save();
       
       res.json({ message: 'Estoque atualizado com sucesso!', produto });

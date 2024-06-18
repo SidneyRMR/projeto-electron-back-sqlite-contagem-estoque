@@ -3,7 +3,7 @@ import { Modal, Box, Typography, Button, Toolbar } from '@mui/material';
 import QRCode from 'react-qr-code';
 import ScannerCodigoBarras from './ScannerCodigoBarras';
 
-export default function ModalQRCode({ modalAberto, setModalAberto, enderecoLocalIP }) {
+export default function ModalQRCode({ modalAberto, setModalAberto, enderecoLocalIP, produtosFiltrados }) {
   const [result, setResult] = useState('');
 
   return (

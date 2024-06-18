@@ -10,6 +10,7 @@ export default function BarraDeBusca({
   handleMudancaBuscaNome,
   handleMudancaBuscaCodigo,
   handleLeituraCodigoBarras,
+  produtosFiltrados,
   handleAbrirModal
 }) {
   const [isMobile, setIsMobile] = useState(false);
@@ -82,6 +83,7 @@ export default function BarraDeBusca({
             onDetected={handleDetected}
             modalAberto={modalAberto}
             setModalAberto={setModalAberto}
+            produtosFiltrados={produtosFiltrados}
           />
         </>
       ) : (
@@ -106,6 +108,7 @@ export default function BarraDeBusca({
             onDetected={handleDetected}
             modalAberto={modalAberto}
             setModalAberto={setModalAberto}
+            produtosFiltrados={produtosFiltrados}
           />
         <Button
           variant="contained"

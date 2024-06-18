@@ -60,7 +60,7 @@ export default function MobileApp() {
 
   const buscarProdutos = async (enderecoIP) => {
     try {
-      const response = await axios.get(`http://${enderecoIP}:5000/api/produtos`);
+      const response = await axios.get(`http://${enderecoLocalIP}:5000/api/produtos`);
       return response.data;
     } catch (error) {
       console.error('Erro ao buscar os produtos:', error);

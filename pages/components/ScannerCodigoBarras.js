@@ -5,12 +5,14 @@ import {
   BarcodeFormat,
   NotFoundException
 } from "@zxing/library";
-import { useMediaQuery, useTheme, Box, Button, InputLabel, Select, MenuItem, Typography, Grid } from "@mui/material";
+import { useMediaQuery, useTheme, Box, Button, Select, MenuItem, Grid } from "@mui/material";
 
-export default function BarcodeScanner({handleClose}) {
+export default function ScannerCodigoBarras({handleClose, onDetected, produtosFiltrados}) {
   const [selectedDeviceId, setSelectedDeviceId] = useState("");
   const [videoInputDevices, setVideoInputDevices] = useState([]);
   const [code, setCode] = useState("");
+  const [message, setMessage] = useState("");
+  const [messageColor, setMessageColor] = useState("red");
   const codeReader = new BrowserMultiFormatReader();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -52,8 +54,9 @@ export default function BarcodeScanner({handleClose}) {
         "video",
         (result, error) => {
           if (result && result.text) {
-            console.log(`Found ${result.format} code:`, result);
+            console.log(`Formato de codigo ${result.format}:`, result.text);
             setCode(result.text);
+            verificarCodigo(result.text);
           }
           if (error && !(error instanceof NotFoundException)) {
             console.error("Erro de decodificação:", error);
@@ -62,13 +65,32 @@ export default function BarcodeScanner({handleClose}) {
         },
         hints
       );
-      console.log(`Usando dispositivo ${selectedDeviceId} par ler o código de barras`);
+      console.log(`Usando dispositivo ${selectedDeviceId} para ler o código de barras`);
+    }
+  };
+
+  const verificarCodigo = (codigo) => {
+    const index = produtosFiltrados.findIndex(produto => produto.ean == codigo);
+    if (index !== -1) {
+      const produto = produtosFiltrados[index];
+      console.log(`Produto encontrado: ${produto.nome}`);
+      setMessage(`Produto encontrado: ${produto.nome}`);
+      setMessageColor("green");
+      onDetected(produto);
+
+      handleClose();
+
+    } else {
+      console.log("Produto não encontrado!");
+      setMessage("Produto não encontrado!");
+      setMessageColor("red");
     }
   };
 
   const resetScan = () => {
     codeReader.reset();
     setCode("");
+    setMessage("");
     console.log("Reset.");
   };
 
@@ -86,46 +108,57 @@ export default function BarcodeScanner({handleClose}) {
     }
     codeReader.reset();
     setSelectedDeviceId("");
-    handleClose()
+    handleClose();
   };
-  
 
   return (
-    <main className="wrapper" style={{ paddingTop: "2em" }}>
+    <main className="wrapper" style={{ paddingTop: 0 }}>
       <section className="container" id="demo-content">
-
         <div style={{ position: "relative" }}>
           <video
-            ref={videoRef} // Referência para o elemento <video>
+            ref={videoRef}
             id="video"
             style={{
               width: "100%",
               height: "100%",
               border: "2px solid gray",
-              objectFit: "cover", // Preenche o espaço sem distorcer a imagem
-              transform: "scale(1.0)" // Ajuste opcional de zoom
+              objectFit: "cover",
+              transform: "scale(1.0)"
             }}
           ></video>
-          {/* Quadrado central */}
           <div
             style={{
               position: "absolute",
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
-              width: "120px",
+              width: "140px",
               height: "80px",
               border: "2px solid red",
               zIndex: 10,
             }}
           ></div>
+          <div
+            style={{
+              position: "absolute",
+              bottom: 0,
+              width: "100%",
+              // backgroundColor: messageColor,
+              color: messageColor,
+              textAlign: "center",
+              padding: "5px 0",
+              zIndex: 10,
+              marginBottom:10
+            }}
+          >
+            {message}
+          </div>
         </div>
 
         <Box
           id="sourceSelectPanel"
           sx={{ display: videoInputDevices.length > 1 ? "block" : "none", mt: 0 }}
         >
-          {/* <InputLabel htmlFor="sourceSelect" sx={{ mb: 0 }}>Mudar câmera:</InputLabel> */}
           <Select
             id="sourceSelect"
             value={selectedDeviceId}
@@ -133,7 +166,6 @@ export default function BarcodeScanner({handleClose}) {
             fullWidth
             variant="outlined"
             size="small"
-            // sx={{ maxWidth: "400px" }}
           >
             {videoInputDevices.map((device) => (
               <MenuItem key={device.deviceId} value={device.deviceId}>
@@ -143,30 +175,28 @@ export default function BarcodeScanner({handleClose}) {
           </Select>
         </Box>
 
-        {/* <InputLabel htmlFor="sourceSelect" sx={{ mb: 0 }}>Codigo Lido:</InputLabel> */}
-        <Box sx={{ border: "1px solid #ccc", borderRadius: "4px", p: 1, mt: 1, marginBotton:0 }}>
+        <Box sx={{ border: "1px solid #ccc", borderRadius: "4px", p: 1, mt: 1 }}>
           <code>Codigo Lido: {code ? code : "Nenhum código lido"}</code>
-
         </Box>
       </section>
       <Box sx={{ textAlign: 'center', mt: 1 }}>
-      <Grid container justifyContent="space-between" spacing={0.5}>
-        <Grid item>
-          <Button variant="contained" color="primary" onClick={startScan} sx={{width:100}}>
-            Ler 
-          </Button>
+        <Grid container justifyContent="space-between" spacing={0.5}>
+          <Grid item>
+            <Button variant="contained" color="primary" onClick={startScan} sx={{width:100}}>
+              Ler 
+            </Button>
+          </Grid>
+          <Grid item>
+            <Button variant="contained" color="primary" onClick={resetScan} sx={{width:100}}>
+              Limpar
+            </Button>
+          </Grid>
+          <Grid item>
+            <Button variant="contained" color="secondary" onClick={stopStream} sx={{width:100}}>
+              Fechar
+            </Button>
+          </Grid>
         </Grid>
-        <Grid item>
-          <Button variant="contained" color="primary" onClick={resetScan} sx={{width:100}}>
-            Limpar
-          </Button>
-        </Grid>
-        <Grid item>
-          <Button variant="contained" color="secondary" onClick={stopStream} sx={{width:100}}>
-            Fechar
-          </Button>
-        </Grid>
-      </Grid>
       </Box>
     </main>
   );

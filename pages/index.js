@@ -120,6 +120,7 @@ export default function DesktopApp() {
           //handleLeituraCodigoBarras={handleLeituraCodigoBarras}
           handleAbrirModal={() => setModalAberto(true)}
           isMobile={isMobile}
+          produtosFiltrados={produtosFiltrados}
         />
         <TabelaDeProdutos
           produtosFiltrados={produtosFiltrados}
@@ -139,6 +140,7 @@ export default function DesktopApp() {
           modalAberto={modalAberto}
           setModalAberto={setModalAberto}
           enderecoLocalIP={enderecoLocalIP}
+          produtosFiltrados={produtosFiltrados}
         />
       </Box>
     </Box>

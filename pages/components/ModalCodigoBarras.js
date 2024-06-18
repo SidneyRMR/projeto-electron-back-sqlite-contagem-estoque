@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Box, Typography, Button, Toolbar } from '@mui/material';
 import ScannerCodigoBarras from './ScannerCodigoBarras'; // Importe o componente ScannerCodigoBarras aqui
 
-const ModalCodigoBarras = ({ onDetected, modalAberto, setModalAberto }) => {
+const ModalCodigoBarras = ({ onDetected, modalAberto, setModalAberto, produtosFiltrados }) => {
 
   const handleClose = () => {
     setModalAberto(false);
@@ -22,7 +22,7 @@ const ModalCodigoBarras = ({ onDetected, modalAberto, setModalAberto }) => {
           </Typography>
         </Toolbar>
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
-          <ScannerCodigoBarras handleClose={handleClose}/>
+          <ScannerCodigoBarras handleClose={handleClose} onDetected={onDetected} produtosFiltrados={produtosFiltrados}/>
         </Box>
         {/* <Box sx={{ textAlign: 'center', mt: 0 }}>
           <Button onClick={() => setModalAberto(false)} variant="contained">
